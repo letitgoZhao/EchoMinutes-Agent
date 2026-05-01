@@ -1,0 +1,4 @@
+interface:
+  display_name: "EchoMinutes Backend"
+  short_description: "Guide FastAPI backend work."
+  default_prompt: "Use this skill when implementing EchoMinutes-Agent backend APIs, workflow services, providers, persistence, or exports."

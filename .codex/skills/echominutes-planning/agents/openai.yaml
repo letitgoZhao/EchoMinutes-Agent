@@ -1,0 +1,4 @@
+interface:
+  display_name: "EchoMinutes Planning"
+  short_description: "Plan EchoMinutes-Agent delivery slices from the project manual."
+  default_prompt: "Use this skill to plan or scope EchoMinutes-Agent work against the local-first desktop meeting-minutes roadmap."

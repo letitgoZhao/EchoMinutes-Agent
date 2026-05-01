@@ -1,0 +1,4 @@
+interface:
+  display_name: "EchoMinutes Desktop UI"
+  short_description: "Guide Electron and Vue desktop work."
+  default_prompt: "Use this skill when building EchoMinutes-Agent Electron, Vue, renderer, preload, IPC, or desktop UX work."
