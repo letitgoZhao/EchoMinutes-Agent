@@ -1277,18 +1277,20 @@ echominutes-agent/
   package.json
   pnpm-workspace.yaml
   apps/
-    desktop/
-      electron/
-        main/
-        preload/
-      renderer/
-        src/
-          app/
-          components/
-          pages/
-          stores/
-          services/
-          styles/
+    package.json
+    electron.vite.config.ts
+    tsconfig.json
+    electron/
+      main/
+      preload/
+    renderer/
+      src/
+        app/
+        components/
+        pages/
+        stores/
+        services/
+        styles/
   backend/
     pyproject.toml
     app/

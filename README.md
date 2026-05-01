@@ -37,7 +37,7 @@ Import local audio/video
 
 ## Quick Start
 
-This repository is currently at the project-initialization stage. The first implementation milestone is the P0 desktop/backend skeleton.
+This repository now contains the first P0 skeleton: an Electron/Vue renderer shell, a local FastAPI backend, health/settings endpoints, SQLite initialization, mock ASR/LLM providers, and a lightweight Chinese/English UI switch.
 
 ### Prerequisites
 
@@ -68,6 +68,22 @@ DASHSCOPE_MODEL="qwen-plus"
 
 Real user keys should eventually be entered through the desktop settings UI. `.env` is only for early local testing.
 
+### Run Locally
+
+After installing dependencies, start the development workflow:
+
+```powershell
+corepack pnpm install
+.\scripts\dev.ps1
+```
+
+Or start services manually:
+
+```powershell
+uv run --project backend uvicorn --app-dir backend app.main:app --reload --host 127.0.0.1 --port 8765
+corepack pnpm --filter @echominutes/desktop dev
+```
+
 ## Planned Architecture
 
 ```text
@@ -88,12 +104,18 @@ The expected structure is shown at directory level. Only special project files a
 echominutes-agent/
   .codex/
   apps/
-    desktop/
+    package.json
+    electron.vite.config.ts
+    tsconfig.json
+    electron/
+    renderer/
   backend/
     pyproject.toml
   docs/
     EchoMinutes-Agent.md
   scripts/
+    dev.ps1
+    dev.sh
   workspace.example/
   .editorconfig
   .env.example

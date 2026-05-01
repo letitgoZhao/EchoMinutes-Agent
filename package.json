@@ -1,0 +1,20 @@
+{
+  "name": "echominutes-agent",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local-first AI meeting minutes desktop workspace.",
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "dev": "corepack pnpm --filter @echominutes/desktop dev",
+    "dev:backend": "uv run --project backend uvicorn --app-dir backend app.main:app --reload --host 127.0.0.1 --port 8765",
+    "dev:desktop": "corepack pnpm --filter @echominutes/desktop dev",
+    "build": "corepack pnpm --filter @echominutes/desktop build",
+    "typecheck": "corepack pnpm --filter @echominutes/desktop typecheck",
+    "lint": "corepack pnpm --filter @echominutes/desktop lint",
+    "test:backend": "uv run --project backend pytest"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=9.0.0"
+  }
+}

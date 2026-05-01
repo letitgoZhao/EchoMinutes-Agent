@@ -38,6 +38,9 @@ apps/*/dist/
 apps/*/build/
 apps/*/.vite/
 apps/*/coverage/
+apps/*/out/
+apps/out/
+apps/.vite/
 release/
 out/
 *.asar

@@ -1,0 +1,268 @@
+:root {
+  color: #20232a;
+  background: #f7f7f4;
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  line-height: 1.5;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+button,
+textarea {
+  font: inherit;
+}
+
+button {
+  border: 1px solid #c9c6bc;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #20232a;
+  cursor: pointer;
+  padding: 8px 12px;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.app-shell {
+  min-height: 100vh;
+}
+
+.topbar {
+  align-items: center;
+  background: #ffffff;
+  border-bottom: 1px solid #dedbd2;
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 20px;
+  padding: 16px 24px;
+}
+
+.topbar h1,
+.topbar p,
+.sidebar h2,
+.transcript-panel h2,
+.settings-page h2,
+.note-panel h2 {
+  margin: 0;
+}
+
+.eyebrow {
+  color: #6d706a;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.nav-tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.nav-tabs a {
+  border-radius: 6px;
+  color: #555b52;
+  padding: 8px 12px;
+  text-decoration: none;
+}
+
+.nav-tabs a.router-link-active {
+  background: #20232a;
+  color: #ffffff;
+}
+
+.language-toggle {
+  background: #efeee8;
+  border: 1px solid #dedbd2;
+  border-radius: 8px;
+  display: inline-flex;
+  padding: 3px;
+}
+
+.language-toggle button {
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: #555b52;
+  min-width: 44px;
+  padding: 6px 9px;
+}
+
+.language-toggle button.active {
+  background: #ffffff;
+  color: #20232a;
+  font-weight: 700;
+}
+
+.status-badge {
+  align-items: center;
+  display: inline-flex;
+  gap: 8px;
+}
+
+.status-dot {
+  background: #a9a9a1;
+  border-radius: 999px;
+  display: inline-block;
+  height: 9px;
+  width: 9px;
+}
+
+.status-badge.ok .status-dot {
+  background: #288568;
+}
+
+.status-badge.error .status-dot {
+  background: #b84a3a;
+}
+
+.workspace-layout {
+  display: grid;
+  grid-template-columns: 260px minmax(360px, 1fr) minmax(360px, 42%);
+  min-height: calc(100vh - 81px);
+}
+
+.sidebar,
+.transcript-panel,
+.note-panel,
+.settings-page {
+  padding: 20px;
+}
+
+.sidebar {
+  background: #efeee8;
+  border-right: 1px solid #dedbd2;
+}
+
+.transcript-panel {
+  border-right: 1px solid #dedbd2;
+}
+
+.transcript-panel > header,
+.note-panel > header,
+.settings-page > header {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.workflow-stepper {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+  margin: 20px 0;
+  padding: 0;
+}
+
+.workflow-stepper li {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+
+.workflow-stepper span {
+  align-items: center;
+  background: #d8d5cb;
+  border-radius: 999px;
+  display: inline-flex;
+  height: 24px;
+  justify-content: center;
+  width: 24px;
+}
+
+.workflow-stepper .active span {
+  background: #288568;
+  color: #ffffff;
+}
+
+.muted-copy,
+.workflow-stepper .muted {
+  color: #6d706a;
+}
+
+.transcript-card {
+  background: #ffffff;
+  border: 1px solid #dedbd2;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  padding: 14px;
+}
+
+.transcript-card header {
+  color: #555b52;
+  display: flex;
+  font-size: 13px;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.transcript-card p {
+  margin: 0;
+}
+
+.transcript-card small,
+.error-copy {
+  color: #b84a3a;
+}
+
+.note-panel textarea {
+  border: 1px solid #c9c6bc;
+  border-radius: 8px;
+  min-height: 560px;
+  padding: 14px;
+  resize: vertical;
+  width: 100%;
+}
+
+.settings-page {
+  max-width: 760px;
+}
+
+.settings-grid {
+  background: #ffffff;
+  border: 1px solid #dedbd2;
+  border-radius: 8px;
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  overflow: hidden;
+}
+
+.settings-grid dt,
+.settings-grid dd {
+  border-bottom: 1px solid #efeee8;
+  margin: 0;
+  padding: 12px 14px;
+}
+
+.settings-grid dt {
+  background: #f2f1ec;
+  color: #555b52;
+  font-weight: 600;
+}
+
+@media (max-width: 1000px) {
+  .topbar,
+  .workspace-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .workspace-layout {
+    min-height: auto;
+  }
+
+  .sidebar,
+  .transcript-panel {
+    border-right: 0;
+    border-bottom: 1px solid #dedbd2;
+  }
+}
