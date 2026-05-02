@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell } from "electron";
+import { app, BrowserWindow, dialog, ipcMain, shell } from "electron";
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { existsSync } from "node:fs";
 import { request } from "node:http";
@@ -9,6 +9,12 @@ let backendProcess: ChildProcessWithoutNullStreams | null = null;
 
 const BACKEND_HOST = process.env.ECHOMINUTES_API_HOST ?? "127.0.0.1";
 const BACKEND_PORT = process.env.ECHOMINUTES_API_PORT ?? "8765";
+
+interface SelectedMediaFile {
+  canceled: boolean;
+  filePath: string | null;
+  fileName: string | null;
+}
 
 function findBackendDir(): string {
   const candidates = [
@@ -107,6 +113,53 @@ function stopBackend(): void {
   backendProcess = null;
 }
 
+function registerIpcHandlers(): void {
+  ipcMain.handle("media:select", async (): Promise<SelectedMediaFile> => {
+    const dialogOptions: Electron.OpenDialogOptions = {
+      title: "Select meeting media",
+      properties: ["openFile"],
+      filters: [
+        {
+          name: "Audio and video",
+          extensions: [
+            "aac",
+            "flac",
+            "m4a",
+            "mkv",
+            "mov",
+            "mp3",
+            "mp4",
+            "ogg",
+            "wav",
+            "webm",
+            "wma"
+          ]
+        },
+        { name: "All files", extensions: ["*"] }
+      ]
+    };
+
+    const result = mainWindow
+      ? await dialog.showOpenDialog(mainWindow, dialogOptions)
+      : await dialog.showOpenDialog(dialogOptions);
+
+    if (result.canceled || result.filePaths.length === 0) {
+      return {
+        canceled: true,
+        filePath: null,
+        fileName: null
+      };
+    }
+
+    const [filePath] = result.filePaths;
+    return {
+      canceled: false,
+      filePath,
+      fileName: filePath.split(/[\\/]/).pop() ?? filePath
+    };
+  });
+}
+
 async function createWindow(): Promise<void> {
   mainWindow = new BrowserWindow({
     width: 1280,
@@ -135,6 +188,8 @@ async function createWindow(): Promise<void> {
 }
 
 app.whenReady().then(async () => {
+  registerIpcHandlers();
+
   const shouldSkipBackendStart = process.env.ECHOMINUTES_SKIP_BACKEND_START === "1";
   const backendAlreadyRunning = await isBackendRunning();
 

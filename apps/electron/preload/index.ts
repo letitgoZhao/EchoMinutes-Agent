@@ -1,4 +1,4 @@
-import { contextBridge } from "electron";
+import { contextBridge, ipcRenderer } from "electron";
 
 const backendBaseUrl = `http://${process.env.ECHOMINUTES_API_HOST ?? "127.0.0.1"}:${
   process.env.ECHOMINUTES_API_PORT ?? "8765"
@@ -7,5 +7,8 @@ const backendBaseUrl = `http://${process.env.ECHOMINUTES_API_HOST ?? "127.0.0.1"
 contextBridge.exposeInMainWorld("echominutes", {
   backend: {
     getBaseUrl: async () => backendBaseUrl
+  },
+  media: {
+    selectFile: async () => ipcRenderer.invoke("media:select")
   }
 });
