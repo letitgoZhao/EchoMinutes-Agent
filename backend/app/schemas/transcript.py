@@ -8,3 +8,12 @@ class TranscriptSegment(BaseModel):
     end_ms: int = Field(serialization_alias="endMs")
     text: str
     confidence: float
+
+
+class SpeakerRename(BaseModel):
+    current_speaker: str
+    new_speaker: str
+
+
+class TranscriptSegmentUpdate(BaseModel):
+    text: str

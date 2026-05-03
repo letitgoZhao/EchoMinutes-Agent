@@ -4,5 +4,5 @@ from app.schemas.transcript import TranscriptSegment
 
 
 class ASRProvider(Protocol):
-    def transcribe_placeholder(self) -> list[TranscriptSegment]:
-        """Return placeholder transcript segments for P0 development."""
+    def transcribe(self, media_path: str) -> list[TranscriptSegment]:
+        """Return transcript segments for the provided local media path."""

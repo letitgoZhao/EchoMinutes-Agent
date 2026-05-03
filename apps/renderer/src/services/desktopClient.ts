@@ -4,12 +4,29 @@ export interface SelectedMediaFile {
   fileName: string | null;
 }
 
-export async function selectMediaFile(): Promise<SelectedMediaFile> {
-  const fallback: SelectedMediaFile = {
-    canceled: true,
-    filePath: null,
-    fileName: null
-  };
+export class DesktopCapabilityError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "DesktopCapabilityError";
+  }
+}
 
-  return window.echominutes?.media.selectFile() ?? fallback;
+export async function selectMediaFile(): Promise<SelectedMediaFile> {
+  if (!window.echominutes?.media) {
+    throw new DesktopCapabilityError(
+      "The Electron desktop bridge is unavailable. Restart the desktop app and try again."
+    );
+  }
+
+  return window.echominutes.media.selectFile();
+}
+
+export async function openLocalPath(targetPath: string): Promise<void> {
+  if (!window.echominutes?.shell) {
+    throw new DesktopCapabilityError(
+      "The Electron desktop bridge is unavailable. Restart the desktop app and try again."
+    );
+  }
+
+  await window.echominutes.shell.openPath(targetPath);
 }

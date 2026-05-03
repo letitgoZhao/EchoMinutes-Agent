@@ -8,7 +8,9 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.models.meeting import Meeting
 from app.schemas.meeting import MeetingCreate
+from app.utils.logging import get_app_logger
 
+logger = get_app_logger("meeting")
 
 class MeetingImportError(ValueError):
     pass
@@ -48,4 +50,9 @@ def create_meeting_from_source(db: Session, payload: MeetingCreate) -> Meeting:
     db.add(meeting)
     db.commit()
     db.refresh(meeting)
+    logger.info(
+        "Imported meeting media for meeting_id=%s source_file=%s",
+        meeting.id,
+        meeting.source_file_name,
+    )
     return meeting

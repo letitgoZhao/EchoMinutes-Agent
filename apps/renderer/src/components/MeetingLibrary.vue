@@ -16,6 +16,16 @@ const emit = defineEmits<{
 }>();
 
 const i18n = useI18nStore();
+
+function getStatusLabel(status: string): string {
+  if (status === "transcribed") {
+    return i18n.t("statusTranscribed");
+  }
+  if (status === "transcribing") {
+    return i18n.t("statusTranscribing");
+  }
+  return i18n.t("statusImported");
+}
 </script>
 
 <template>
@@ -45,9 +55,9 @@ const i18n = useI18nStore();
             :class="{ active: meeting.id === selectedMeetingId }"
             @click="emit('selectMeeting', meeting.id)"
           >
-            <strong>{{ meeting.title }}</strong>
-            <span>{{ meeting.sourceFileName }}</span>
-            <small>{{ i18n.t("statusImported") }}</small>
+            <strong class="meeting-list-item-title">{{ meeting.title }}</strong>
+            <span class="meeting-list-item-meta">{{ meeting.sourceFileName }}</span>
+            <small>{{ getStatusLabel(meeting.status) }}</small>
           </button>
         </li>
       </template>

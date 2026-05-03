@@ -2,7 +2,7 @@ from app.schemas.transcript import TranscriptSegment
 
 
 class MockASRProvider:
-    def transcribe_placeholder(self) -> list[TranscriptSegment]:
+    def transcribe(self, media_path: str) -> list[TranscriptSegment]:
         return [
             TranscriptSegment(
                 id="seg-001",

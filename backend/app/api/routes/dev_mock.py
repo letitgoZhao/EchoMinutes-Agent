@@ -11,7 +11,7 @@ router = APIRouter()
 @router.get("/transcript", response_model=list[TranscriptSegment])
 async def get_mock_transcript() -> list[TranscriptSegment]:
     provider = MockASRProvider()
-    return provider.transcribe_placeholder()
+    return provider.transcribe("mock://p0")
 
 
 @router.get("/note", response_model=NoteResponse)

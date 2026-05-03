@@ -10,5 +10,8 @@ contextBridge.exposeInMainWorld("echominutes", {
   },
   media: {
     selectFile: async () => ipcRenderer.invoke("media:select")
+  },
+  shell: {
+    openPath: async (targetPath: string) => ipcRenderer.invoke("shell:openPath", targetPath)
   }
 });

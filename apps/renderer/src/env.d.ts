@@ -11,6 +11,9 @@ interface EchoMinutesDesktopApi {
       fileName: string | null;
     }>;
   };
+  shell: {
+    openPath: (targetPath: string) => Promise<void>;
+  };
 }
 
 declare global {

@@ -7,11 +7,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.router import api_router
 from app.core.config import settings
 from app.db.init_db import init_db
+from app.utils.logging import get_app_logger
 
+logger = get_app_logger("app")
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     init_db()
+    logger.info("Application startup complete.")
     yield
 
 

@@ -2,7 +2,7 @@ import { app, BrowserWindow, dialog, ipcMain, shell } from "electron";
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { existsSync } from "node:fs";
 import { request } from "node:http";
-import { join, resolve } from "node:path";
+import { isAbsolute, join, resolve } from "node:path";
 
 let mainWindow: BrowserWindow | null = null;
 let backendProcess: ChildProcessWithoutNullStreams | null = null;
@@ -113,6 +113,20 @@ function stopBackend(): void {
   backendProcess = null;
 }
 
+function getPreloadPath(): string {
+  const candidates = [
+    join(__dirname, "../preload/index.mjs"),
+    join(__dirname, "../preload/index.js")
+  ];
+
+  const preloadPath = candidates.find((candidate) => existsSync(candidate));
+  if (!preloadPath) {
+    throw new Error("Unable to locate Electron preload bundle");
+  }
+
+  return preloadPath;
+}
+
 function registerIpcHandlers(): void {
   ipcMain.handle("media:select", async (): Promise<SelectedMediaFile> => {
     const dialogOptions: Electron.OpenDialogOptions = {
@@ -158,6 +172,17 @@ function registerIpcHandlers(): void {
       fileName: filePath.split(/[\\/]/).pop() ?? filePath
     };
   });
+
+  ipcMain.handle("shell:openPath", async (_event, targetPath: string): Promise<void> => {
+    if (!targetPath || !isAbsolute(targetPath)) {
+      throw new Error("A valid absolute path is required.");
+    }
+
+    const errorMessage = await shell.openPath(targetPath);
+    if (errorMessage) {
+      throw new Error(errorMessage);
+    }
+  });
 }
 
 async function createWindow(): Promise<void> {
@@ -168,7 +193,7 @@ async function createWindow(): Promise<void> {
     minHeight: 680,
     title: "EchoMinutes Agent",
     webPreferences: {
-      preload: join(__dirname, "../preload/index.js"),
+      preload: getPreloadPath(),
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: false

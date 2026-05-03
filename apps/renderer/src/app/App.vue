@@ -1,11 +1,19 @@
 <script setup lang="ts">
+import { onMounted } from "vue";
 import { RouterLink, RouterView } from "vue-router";
 
 import BackendStatusBadge from "../components/BackendStatusBadge.vue";
 import LanguageToggle from "../components/LanguageToggle.vue";
+import ThemeSwitcher from "../components/ThemeSwitcher.vue";
 import { useI18nStore } from "../stores/i18n";
+import { useThemeStore } from "../stores/theme";
 
 const i18n = useI18nStore();
+const themeStore = useThemeStore();
+
+onMounted(() => {
+  themeStore.applyCurrentTheme();
+});
 </script>
 
 <template>
@@ -22,6 +30,7 @@ const i18n = useI18nStore();
       </nav>
 
       <LanguageToggle />
+      <ThemeSwitcher />
       <BackendStatusBadge />
     </header>
 
