@@ -7,10 +7,15 @@ from app.models.meeting import Meeting
 from app.models.task import ProcessingTask
 from app.models.transcript_segment import TranscriptSegmentRecord
 from app.schemas.transcript import TranscriptSegment
-from app.services.providers.asr.mock import MockASRProvider
+from app.services.providers.asr.factory import get_asr_provider
+from app.services.workflow.media_preprocess_service import (
+    MediaPreparationError,
+    prepare_media_for_transcription,
+)
 from app.utils.logging import get_app_logger
 
 logger = get_app_logger("transcription")
+
 
 class TranscriptionError(ValueError):
     pass
@@ -40,9 +45,9 @@ def get_transcript_segments(db: Session, meeting_id: str) -> list[TranscriptSegm
     ]
 
 
-def transcribe_meeting_with_mock(db: Session, meeting_id: str) -> Meeting:
+def transcribe_meeting(db: Session, meeting_id: str) -> Meeting:
     task = create_transcription_task(db, meeting_id)
-    meeting = _run_mock_transcription_for_task(db, task)
+    meeting = _run_transcription_for_task(db, task)
     return meeting
 
 
@@ -100,11 +105,11 @@ def retry_transcription_task(db: Session, meeting_id: str, task_id: str) -> Proc
     return task
 
 
-def run_transcription_task_with_mock(db: Session, task: ProcessingTask) -> Meeting:
-    return _run_mock_transcription_for_task(db, task)
+def run_transcription_task(db: Session, task: ProcessingTask) -> Meeting:
+    return _run_transcription_for_task(db, task)
 
 
-def _run_mock_transcription_for_task(db: Session, task: ProcessingTask) -> Meeting:
+def _run_transcription_for_task(db: Session, task: ProcessingTask) -> Meeting:
     meeting = db.get(Meeting, task.meeting_id)
     if meeting is None:
         _fail_task(db, task, "Meeting not found.", retryable=False)
@@ -121,8 +126,16 @@ def _run_mock_transcription_for_task(db: Session, task: ProcessingTask) -> Meeti
         if not meeting.workspace_media_path:
             raise TranscriptionError("Meeting media is not available for transcription.")
 
-        provider = MockASRProvider()
-        segments = provider.transcribe(meeting.workspace_media_path)
+        provider = get_asr_provider()
+        prepared_media = prepare_media_for_transcription(
+            task.meeting_id,
+            meeting.workspace_media_path,
+        )
+        segments = provider.transcribe(
+            str(prepared_media.normalized_path),
+            media_format=prepared_media.format,
+            sample_rate_hz=prepared_media.sample_rate_hz,
+        )
 
         db.execute(
             delete(TranscriptSegmentRecord).where(
@@ -151,12 +164,27 @@ def _run_mock_transcription_for_task(db: Session, task: ProcessingTask) -> Meeti
         db.refresh(meeting)
         db.refresh(task)
         logger.info(
-            "Completed transcription meeting_id=%s task_id=%s segments=%s",
+            "Completed transcription meeting_id=%s task_id=%s "
+            "segments=%s provider=%s normalized=%s",
             meeting.id,
             task.id,
             len(segments),
+            type(provider).__name__,
+            prepared_media.normalized,
         )
         return meeting
+    except MediaPreparationError as error:
+        meeting.status = "failed"
+        meeting.error_message = str(error)
+        _fail_task(db, task, str(error), retryable=True)
+        db.refresh(meeting)
+        logger.error(
+            "Media preparation failed meeting_id=%s task_id=%s error=%s",
+            task.meeting_id,
+            task.id,
+            error,
+        )
+        raise TranscriptionError(str(error)) from error
     except TranscriptionError as error:
         meeting.status = "failed"
         meeting.error_message = str(error)
@@ -169,6 +197,18 @@ def _run_mock_transcription_for_task(db: Session, task: ProcessingTask) -> Meeti
             error,
         )
         raise
+    except Exception as error:
+        message = "Real transcription failed. Check your DashScope settings and retry."
+        meeting.status = "failed"
+        meeting.error_message = message
+        _fail_task(db, task, message, retryable=True)
+        db.refresh(meeting)
+        logger.exception(
+            "Unexpected transcription failure meeting_id=%s task_id=%s",
+            task.meeting_id,
+            task.id,
+        )
+        raise TranscriptionError(message) from error
 
 
 def rename_speaker(

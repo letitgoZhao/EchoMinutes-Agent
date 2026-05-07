@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.models.setting import Setting
 from app.schemas.settings import AppSettings, AppSettingsUpdate
+from app.services.workflow.media_preprocess_service import get_ffmpeg_path
 
 SETTING_KEYS = {
     "workspace_dir",
@@ -25,17 +26,24 @@ def _set_value(db: Session, key: str, value: str) -> None:
 
 
 def get_app_settings(db: Session) -> AppSettings:
+    ffmpeg_path = get_ffmpeg_path()
     return AppSettings(
         api_host=settings.api_host,
         api_port=settings.api_port,
         workspace_dir=_get_value(db, "workspace_dir", str(settings.workspace_dir)),
+        transcription_provider=settings.transcription_provider,
+        asr_ready=settings.has_dashscope_api_key,
         dashscope_base_url=_get_value(
             db,
             "dashscope_base_url",
             settings.dashscope_base_url,
         ),
         dashscope_model=_get_value(db, "dashscope_model", settings.dashscope_model),
+        dashscope_asr_base_url=settings.dashscope_asr_base_url,
+        dashscope_asr_model=settings.dashscope_asr_model,
         has_dashscope_api_key=settings.has_dashscope_api_key,
+        ffmpeg_available=ffmpeg_path is not None,
+        ffmpeg_path=ffmpeg_path,
     )
 
 

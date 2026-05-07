@@ -31,16 +31,14 @@ dist/
 build/
 *.egg-info/
 
-# uv lockfiles should usually be committed for apps.
+# uv lockfiles should usually be committed for application projects.
 
 # Frontend / desktop build output
-apps/*/dist/
-apps/*/build/
-apps/*/.vite/
-apps/*/coverage/
-apps/*/out/
-apps/out/
-apps/.vite/
+frontend/dist/
+frontend/build/
+frontend/.vite/
+frontend/coverage/
+frontend/out/
 release/
 out/
 *.asar
@@ -64,6 +62,8 @@ data/
 *.sqlite3
 *.db
 *.db-journal
+wav/
+.cache/
 
 # OS and editor noise
 .DS_Store

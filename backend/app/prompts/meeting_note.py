@@ -1,8 +1,15 @@
 from app.schemas.transcript import TranscriptSegment
 
-STANDARD_MEETING_NOTE_PROMPT = """Write concise Qwen-style meeting minutes.
+STANDARD_MEETING_NOTE_PROMPT = """Write enterprise-ready Qwen-style meeting minutes.
 
-Use this Markdown structure:
+Requirements:
+- Write in the same primary language as the transcript.
+- Do not invent facts, owners, dates, or decisions that are not present.
+- Preserve speaker names when they matter for accountability.
+- Keep action items specific and mark unknown owners as "Unassigned".
+- Return Markdown only.
+
+Use this Markdown structure exactly:
 
 # Meeting Minutes
 
@@ -11,6 +18,10 @@ Use this Markdown structure:
 ## Decisions
 
 ## Action Items
+
+## Risks And Follow-ups
+
+## Speaker Notes
 
 Ground the note only in the transcript segments provided.
 """

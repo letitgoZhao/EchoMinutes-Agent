@@ -1,8 +1,7 @@
 from pathlib import Path
 
-from fastapi.testclient import TestClient
-
 from app.main import create_app
+from fastapi.testclient import TestClient
 
 
 def _create_transcribed_meeting(client: TestClient, tmp_path: Path) -> dict:
@@ -17,7 +16,7 @@ def _create_transcribed_meeting(client: TestClient, tmp_path: Path) -> dict:
     return meeting
 
 
-def test_summarize_meeting_persists_mock_note(tmp_path: Path) -> None:
+def test_summarize_meeting_persists_provider_note(tmp_path: Path) -> None:
     with TestClient(create_app()) as client:
         meeting = _create_transcribed_meeting(client, tmp_path)
         summarize_response = client.post(f"/api/meetings/{meeting['id']}/note/summarize")
@@ -27,7 +26,7 @@ def test_summarize_meeting_persists_mock_note(tmp_path: Path) -> None:
     note = summarize_response.json()
     assert note["meetingId"] == meeting["id"]
     assert note["markdown"].startswith("# Meeting Minutes")
-    assert "mock LLM" in note["markdown"]
+    assert "DashScope providers" in note["markdown"]
     assert note_response.json()["markdown"] == note["markdown"]
 
 

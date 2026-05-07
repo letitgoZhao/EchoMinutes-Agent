@@ -13,7 +13,7 @@ Use this skill for backend implementation in `backend/`.
 2. Use `uv` for Python dependency management and backend commands.
 3. Keep API routers thin and move business logic into services.
 4. Put external AI calls behind provider interfaces.
-5. Provide mock provider behavior before real provider behavior.
+5. Keep test doubles in tests, not in the production provider path.
 6. Keep prompts centralized, versionable, and away from UI code.
 7. Store local state in SQLite through SQLAlchemy.
 8. Add focused tests for service behavior when implementation exists.
@@ -32,7 +32,7 @@ Use this skill for backend implementation in `backend/`.
 ## Provider Rules
 
 - Do not call Aliyun, Qwen, or any cloud API directly from routers.
-- Do not require API keys for mock provider flows.
+- Keep tests offline with monkeypatched provider doubles.
 - Never log secrets.
 - Return explicit task states and retryable errors.
 - Use DashScope compatible-mode settings for early LLM tests:

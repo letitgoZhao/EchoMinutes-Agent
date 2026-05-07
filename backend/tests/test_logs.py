@@ -1,9 +1,8 @@
 from pathlib import Path
 from uuid import uuid4
 
-from fastapi.testclient import TestClient
-
 from app.main import create_app
+from fastapi.testclient import TestClient
 
 
 def test_recent_logs_endpoint_returns_startup_entry() -> None:

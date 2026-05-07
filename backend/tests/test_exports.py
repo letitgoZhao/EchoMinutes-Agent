@@ -1,8 +1,8 @@
 from pathlib import Path
-
-from fastapi.testclient import TestClient
+from zipfile import ZipFile
 
 from app.main import create_app
+from fastapi.testclient import TestClient
 
 
 def _create_meeting_with_note(client: TestClient, tmp_path: Path) -> dict:
@@ -15,7 +15,15 @@ def _create_meeting_with_note(client: TestClient, tmp_path: Path) -> dict:
     meeting = create_response.json()
     client.put(
         f"/api/meetings/{meeting['id']}/note",
-        json={"markdown": "# Export Review\n\nReady to export."},
+        json={
+            "markdown": (
+                "# Export Review\n\n"
+                "Ready to export.\n\n"
+                "## Decisions\n\n"
+                "- Ship structured exports.\n"
+                "1. Validate generated files."
+            )
+        },
     )
     return meeting
 
@@ -35,7 +43,11 @@ def test_markdown_export_writes_file_and_records_history(tmp_path: Path) -> None
     assert export["fileName"].endswith(".md")
     assert (
         Path(export["filePath"]).read_text(encoding="utf-8")
-        == "# Export Review\n\nReady to export."
+        == "# Export Review\n\n"
+        "Ready to export.\n\n"
+        "## Decisions\n\n"
+        "- Ship structured exports.\n"
+        "1. Validate generated files."
     )
 
     assert history_response.status_code == 200
@@ -54,7 +66,10 @@ def test_pdf_export_writes_pdf_file(tmp_path: Path) -> None:
     export = export_response.json()
     assert export["format"] == "pdf"
     assert export["fileName"].endswith(".pdf")
-    assert Path(export["filePath"]).read_bytes().startswith(b"%PDF-1.4")
+    pdf_bytes = Path(export["filePath"]).read_bytes()
+    assert pdf_bytes.startswith(b"%PDF-1.4")
+    assert b"/Info" in pdf_bytes
+    assert b"EchoMinutes Agent" in pdf_bytes
 
 
 def test_word_export_writes_docx_file(tmp_path: Path) -> None:
@@ -69,7 +84,16 @@ def test_word_export_writes_docx_file(tmp_path: Path) -> None:
     export = export_response.json()
     assert export["format"] == "word"
     assert export["fileName"].endswith(".docx")
-    assert Path(export["filePath"]).read_bytes().startswith(b"PK")
+    with ZipFile(export["filePath"]) as docx:
+        names = set(docx.namelist())
+        document_xml = docx.read("word/document.xml").decode("utf-8")
+
+    assert "word/styles.xml" in names
+    assert "word/numbering.xml" in names
+    assert "docProps/core.xml" in names
+    assert 'w:pStyle w:val="Heading1"' in document_xml
+    assert 'w:numId w:val="1"' in document_xml
+    assert 'w:numId w:val="2"' in document_xml
 
 
 def test_markdown_export_requires_saved_note(tmp_path: Path) -> None:

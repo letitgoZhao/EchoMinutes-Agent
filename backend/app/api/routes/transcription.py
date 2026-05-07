@@ -15,9 +15,11 @@ from app.services.workflow.transcription_service import (
     list_transcription_tasks,
     rename_speaker,
     retry_transcription_task,
-    run_transcription_task_with_mock,
-    transcribe_meeting_with_mock,
+    run_transcription_task,
     update_transcript_segment,
+)
+from app.services.workflow.transcription_service import (
+    transcribe_meeting as run_meeting_transcription,
 )
 
 router = APIRouter(prefix="/meetings/{meeting_id}")
@@ -27,7 +29,7 @@ DbSession = Annotated[Session, Depends(get_db)]
 @router.post("/transcribe", response_model=MeetingResponse)
 async def transcribe_meeting(meeting_id: str, db: DbSession) -> MeetingResponse:
     try:
-        return transcribe_meeting_with_mock(db, meeting_id)
+        return run_meeting_transcription(db, meeting_id)
     except TranscriptionError as error:
         detail = str(error)
         status_code = (
@@ -53,7 +55,7 @@ async def start_transcription_task(
 ) -> TranscriptionTaskRunResponse:
     try:
         task = create_transcription_task(db, meeting_id)
-        meeting = run_transcription_task_with_mock(db, task)
+        meeting = run_transcription_task(db, task)
         return TranscriptionTaskRunResponse(task=task, meeting=meeting)
     except TranscriptionError as error:
         detail = str(error)
@@ -76,7 +78,7 @@ async def retry_transcription(
 ) -> TranscriptionTaskRunResponse:
     try:
         task = retry_transcription_task(db, meeting_id, task_id)
-        meeting = run_transcription_task_with_mock(db, task)
+        meeting = run_transcription_task(db, task)
         return TranscriptionTaskRunResponse(task=task, meeting=meeting)
     except TaskRetryError as error:
         detail = str(error)

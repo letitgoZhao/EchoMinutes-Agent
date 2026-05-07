@@ -1,0 +1,261 @@
+import { defineStore } from "pinia";
+
+const STORAGE_KEY = "echominutes.language";
+
+export const translations = {
+  en: {
+    workspaceNav: "Workspace",
+    settingsNav: "Settings",
+    primaryNavigation: "Primary navigation",
+    languageToggleLabel: "Switch language",
+    languageEnglish: "EN",
+    languageChinese: "中文",
+    backendChecking: "Checking backend",
+    backendOnline: "Backend {version}",
+    backendOffline: "Backend offline",
+    meetingLibraryTitle: "Meeting Library",
+    p1ImportDescription: "Import local media and keep every step traceable.",
+    importMedia: "Import Media",
+    importingMedia: "Importing...",
+    runTranscription: "Run DashScope ASR",
+    transcribingMedia: "Transcribing...",
+    loadingMeetings: "Loading meetings...",
+    noMeetings: "No meetings yet. Import a local audio or video file to begin.",
+    statusImported: "Imported",
+    statusTranscribing: "Transcribing",
+    statusTranscribed: "Transcribed",
+    statusFailed: "Failed",
+    currentMeeting: "Current Meeting",
+    sourceMedia: "Source Media",
+    copiedMedia: "Copied Media",
+    transcriptPending: "DashScope transcription is ready when API settings are configured.",
+    noTranscript: "No transcript yet. Start DashScope ASR for this meeting.",
+    transcriptTitle: "Transcript",
+    transcriptEditorLabel: "Transcript editor",
+    saveTranscript: "Save Transcript",
+    savingTranscript: "Saving...",
+    resetTranscript: "Reset",
+    noteTitle: "Meeting Note",
+    noteMode: "Note mode",
+    editNote: "Edit",
+    previewNote: "Preview",
+    regenerate: "Generate Note",
+    generatingNote: "Generating...",
+    saveNote: "Save Note",
+    savingNote: "Saving...",
+    exportMarkdown: "Export Markdown",
+    exportingMarkdown: "Exporting...",
+    exportPdf: "Export PDF",
+    exportingPdf: "Exporting...",
+    exportWord: "Export Word",
+    exportingWord: "Exporting...",
+    exportHistory: "Export History",
+    noExports: "No exports yet.",
+    openExportFolder: "Open Folder",
+    openingExportFolder: "Opening...",
+    noteEditorLabel: "Meeting note editor",
+    notePreviewLabel: "Meeting note preview",
+    notePlaceholder: "# Meeting Minutes\n\nGenerate a DashScope note after transcription.",
+    lowConfidence: "Low confidence",
+    speakerNameLabel: "Speaker name",
+    renameSpeaker: "Rename",
+    latestTranscriptionTask: "Latest Transcription Task",
+    taskStatus: "Status",
+    taskAttempts: "Attempts",
+    retryTask: "Retry",
+    retryingTask: "Retrying...",
+    themeSwitcherLabel: "Theme",
+    themeLightClarity: "Clarity",
+    themeLightSage: "Sage",
+    themeLightQuartz: "Quartz",
+    themeDarkGraphite: "Graphite",
+    themeDarkEmber: "Ember",
+    themeDarkAurora: "Aurora",
+    workflowImport: "Import",
+    workflowTranscribe: "Transcribe",
+    workflowOrganize: "Organize",
+    workflowNotes: "Notes",
+    workflowReview: "Review",
+    workflowExport: "Export",
+    workflowStatusIdle: "Not started",
+    workflowStatusActive: "In progress",
+    workflowStatusComplete: "Done",
+    workflowStatusFailed: "Needs attention",
+    settingsTitle: "Settings",
+    refresh: "Refresh",
+    settingsDescription:
+      "Provider readiness is read from the local environment. Media and transcript text are sent to DashScope when processing starts.",
+    apiHost: "API Host",
+    apiPort: "API Port",
+    workspace: "Workspace",
+    dashscopeBaseUrl: "DashScope Base URL",
+    dashscopeModel: "DashScope Model",
+    dashscopeAsrBaseUrl: "DashScope ASR Base URL",
+    dashscopeAsrModel: "DashScope ASR Model",
+    apiKeyConfigured: "API Key Configured",
+    transcriptionProvider: "Transcription Provider",
+    asrReady: "ASR Ready",
+    ffmpegAvailable: "FFmpeg Available",
+    ffmpegPath: "FFmpeg Path",
+    notConfigured: "Not configured",
+    recentLogsTitle: "Recent Logs",
+    recentLogsDescription: "Latest local workflow events from the backend workspace log.",
+    loadingRecentLogs: "Loading recent logs...",
+    noRecentLogs: "No recent logs yet.",
+    llmReadiness: "LLM Readiness",
+    asrReadiness: "ASR Readiness",
+    testProvider: "Test",
+    testingProvider: "Testing...",
+    yes: "Yes",
+    no: "No",
+    loadingSettings: "Loading settings..."
+  },
+  zh: {
+    workspaceNav: "工作台",
+    settingsNav: "设置",
+    primaryNavigation: "主导航",
+    languageToggleLabel: "切换语言",
+    languageEnglish: "EN",
+    languageChinese: "中文",
+    backendChecking: "正在检查后端",
+    backendOnline: "后端 {version}",
+    backendOffline: "后端离线",
+    meetingLibraryTitle: "会议库",
+    p1ImportDescription: "导入本地媒体，并清楚追踪每一步状态。",
+    importMedia: "导入媒体",
+    importingMedia: "导入中...",
+    runTranscription: "运行 DashScope ASR",
+    transcribingMedia: "转录中...",
+    loadingMeetings: "正在加载会议...",
+    noMeetings: "还没有会议。导入本地音频或视频后开始。",
+    statusImported: "已导入",
+    statusTranscribing: "转录中",
+    statusTranscribed: "已转录",
+    statusFailed: "失败",
+    currentMeeting: "当前会议",
+    sourceMedia: "源媒体",
+    copiedMedia: "工作区副本",
+    transcriptPending: "API 设置完成后即可调用 DashScope 转录。",
+    noTranscript: "还没有转录内容。请先启动 DashScope ASR。",
+    transcriptTitle: "转录稿",
+    transcriptEditorLabel: "转录文本编辑器",
+    saveTranscript: "保存转录",
+    savingTranscript: "保存中...",
+    resetTranscript: "重置",
+    noteTitle: "会议纪要",
+    noteMode: "纪要模式",
+    editNote: "编辑",
+    previewNote: "预览",
+    regenerate: "生成纪要",
+    generatingNote: "生成中...",
+    saveNote: "保存纪要",
+    savingNote: "保存中...",
+    exportMarkdown: "导出 Markdown",
+    exportingMarkdown: "导出中...",
+    exportPdf: "导出 PDF",
+    exportingPdf: "导出中...",
+    exportWord: "导出 Word",
+    exportingWord: "导出中...",
+    exportHistory: "导出历史",
+    noExports: "暂无导出记录。",
+    openExportFolder: "打开目录",
+    openingExportFolder: "打开中...",
+    noteEditorLabel: "会议纪要编辑器",
+    notePreviewLabel: "会议纪要预览",
+    notePlaceholder: "# 会议纪要\n\n转录完成后生成 DashScope 纪要。",
+    lowConfidence: "低置信度",
+    speakerNameLabel: "发言人名称",
+    renameSpeaker: "重命名",
+    latestTranscriptionTask: "最新转录任务",
+    taskStatus: "状态",
+    taskAttempts: "尝试次数",
+    retryTask: "重试",
+    retryingTask: "重试中...",
+    themeSwitcherLabel: "主题",
+    themeLightClarity: "清爽",
+    themeLightSage: "青绿",
+    themeLightQuartz: "石英",
+    themeDarkGraphite: "石墨",
+    themeDarkEmber: "暖夜",
+    themeDarkAurora: "极光",
+    workflowImport: "导入",
+    workflowTranscribe: "转录",
+    workflowOrganize: "整理",
+    workflowNotes: "纪要",
+    workflowReview: "编辑",
+    workflowExport: "导出",
+    workflowStatusIdle: "未开始",
+    workflowStatusActive: "进行中",
+    workflowStatusComplete: "已完成",
+    workflowStatusFailed: "需处理",
+    settingsTitle: "设置",
+    refresh: "刷新",
+    settingsDescription:
+      "Provider 就绪状态来自本地环境。开始处理后，媒体会发送到 ASR Provider，转录文本会发送到 LLM Provider。",
+    apiHost: "API 主机",
+    apiPort: "API 端口",
+    workspace: "工作区",
+    dashscopeBaseUrl: "DashScope Base URL",
+    dashscopeModel: "DashScope 模型",
+    dashscopeAsrBaseUrl: "DashScope ASR Base URL",
+    dashscopeAsrModel: "DashScope ASR 模型",
+    apiKeyConfigured: "API Key 已配置",
+    transcriptionProvider: "转录 Provider",
+    asrReady: "ASR 就绪",
+    ffmpegAvailable: "FFmpeg 可用",
+    ffmpegPath: "FFmpeg 路径",
+    notConfigured: "未配置",
+    recentLogsTitle: "最近日志",
+    recentLogsDescription: "来自本地后端工作区日志的最新工作流事件。",
+    loadingRecentLogs: "正在加载日志...",
+    noRecentLogs: "暂无日志。",
+    llmReadiness: "LLM 就绪检查",
+    asrReadiness: "ASR 就绪检查",
+    testProvider: "测试",
+    testingProvider: "测试中...",
+    yes: "是",
+    no: "否",
+    loadingSettings: "正在加载设置..."
+  }
+} as const;
+
+export type LanguageCode = keyof typeof translations;
+export type TranslationKey = keyof (typeof translations)["en"];
+
+function readInitialLanguage(): LanguageCode {
+  if (typeof window === "undefined") {
+    return "zh";
+  }
+
+  const storedLanguage = window.localStorage.getItem(STORAGE_KEY);
+  return storedLanguage === "en" || storedLanguage === "zh" ? storedLanguage : "zh";
+}
+
+export const useI18nStore = defineStore("i18n", {
+  state: () => ({
+    language: readInitialLanguage()
+  }),
+  actions: {
+    setLanguage(language: LanguageCode) {
+      this.language = language;
+      window.localStorage.setItem(STORAGE_KEY, language);
+    },
+    toggleLanguage() {
+      this.setLanguage(this.language === "zh" ? "en" : "zh");
+    },
+    t(key: TranslationKey, params?: Record<string, string | number>) {
+      const localizedTranslations = translations[this.language] as Partial<
+        Record<TranslationKey, string>
+      >;
+      let text: string = localizedTranslations[key] ?? translations.en[key];
+
+      if (params) {
+        for (const [paramKey, value] of Object.entries(params)) {
+          text = text.replace(`{${paramKey}}`, String(value));
+        }
+      }
+
+      return text;
+    }
+  }
+});

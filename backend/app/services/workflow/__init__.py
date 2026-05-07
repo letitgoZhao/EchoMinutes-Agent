@@ -1,1 +1,1 @@
-"""Meeting workflow orchestration placeholders."""
+"""Meeting workflow orchestration services."""

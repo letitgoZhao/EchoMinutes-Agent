@@ -1,1 +1,1 @@
-"""Export service placeholders for Markdown, PDF, and Word."""
+"""Export writers for Markdown, PDF, and Word."""

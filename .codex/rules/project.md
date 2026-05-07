@@ -18,8 +18,8 @@ The full product manual is `docs/EchoMinutes-Agent.md`.
 
 ## Priority Order
 
-1. P0: runnable desktop/backend skeleton with mock providers.
-2. P1: local file import and mock transcription.
+1. P0: runnable desktop/backend skeleton with provider abstractions.
+2. P1: local file import and DashScope transcription.
 3. P2: note generation, editing, speaker rename, history.
 4. P3: export and stability.
 
@@ -39,6 +39,6 @@ The full product manual is `docs/EchoMinutes-Agent.md`.
 ## Safety
 
 - Keep secrets out of git.
-- Use mock providers by default.
+- Keep tests offline with test doubles; do not keep simulated providers in the product path.
 - Cloud provider code must make data transfer explicit and configurable.
 - Logs must not include API keys or raw secrets.

@@ -5,7 +5,7 @@ description: Build EchoMinutes-Agent desktop frontend work. Use for Electron mai
 
 # EchoMinutes Desktop UI
 
-Use this skill for Electron and Vue work under `apps/`.
+Use this skill for Electron and Vue work under `frontend/`.
 
 ## Workflow
 

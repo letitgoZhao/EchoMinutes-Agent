@@ -36,12 +36,12 @@ P0: create the minimum runnable monorepo skeleton.
 - Electron main process, preload, and Vue renderer.
 - FastAPI backend with `GET /api/health`.
 - Renderer displays backend connection status.
-- Basic settings page with placeholder local settings.
+- Basic settings page with local settings.
 - SQLite initialization skeleton with SQLAlchemy.
-- Mock ASR and Mock LLM providers.
+- DashScope ASR and DashScope-compatible LLM providers behind abstractions.
 - Windows and Linux development scripts.
 
-P1: implement file import and mock transcription.
+P1: implement file import and DashScope transcription.
 
 - Use Electron file dialog for audio/video selection.
 - Create meeting records.
@@ -54,7 +54,7 @@ P2: implement meeting note generation and editing.
 
 - Add note model and summarize API.
 - Add prompt templates.
-- Use MockLLMProvider first.
+- Use DashScope-compatible LLM provider for production note generation.
 - Add note editor and save edited Markdown.
 - Add regenerate note action.
 - Add speaker rename support.
@@ -78,7 +78,7 @@ P3: implement export and stabilization.
 - Keep backend layers separated: API, service, provider, model, schema, prompt, export.
 - All ASR and LLM calls must go through provider abstractions.
 - Keep prompts under backend prompt management, not in UI components.
-- Use mock providers for development and tests when real API keys are not required.
+- Keep tests offline with test doubles, but do not keep simulated providers in the product path.
 - Use `path.join` in Node and `pathlib` in Python for paths.
 - Keep local workspace paths configurable.
 - Use `uv` for Python dependency management and backend commands.
@@ -112,7 +112,7 @@ P3: implement export and stabilization.
 - Add abstractions only when they support provider swapping, workflow clarity, or meaningful reuse.
 - Do not do unrelated refactors.
 - Do not introduce heavy UI frameworks unless explicitly justified.
-- Do not implement real Aliyun or Qwen calls before mock providers and interfaces exist.
+- Keep real Aliyun or Qwen calls behind provider/service interfaces.
 
 ## Validation
 

@@ -1,6 +1,5 @@
-from fastapi.testclient import TestClient
-
 from app.main import create_app
+from fastapi.testclient import TestClient
 
 
 def test_health_endpoint() -> None:
@@ -23,9 +22,14 @@ def test_settings_endpoint_reads_local_defaults() -> None:
     assert data["apiHost"] == "127.0.0.1"
     assert data["apiPort"] == 8765
     assert data["workspaceDir"]
+    assert data["transcriptionProvider"] == "dashscope"
+    assert isinstance(data["asrReady"], bool)
     assert data["dashscopeBaseUrl"]
     assert data["dashscopeModel"]
+    assert data["dashscopeAsrBaseUrl"]
+    assert data["dashscopeAsrModel"]
     assert isinstance(data["hasDashscopeApiKey"], bool)
+    assert isinstance(data["ffmpegAvailable"], bool)
 
 
 def test_settings_endpoint_updates_safe_local_values() -> None:
@@ -44,24 +48,21 @@ def test_settings_endpoint_updates_safe_local_values() -> None:
     assert data["dashscopeModel"] == "qwen-plus"
 
 
-def test_mock_transcript_endpoint_returns_speaker_segments() -> None:
+def test_asr_settings_endpoint_reports_dashscope_readiness() -> None:
     with TestClient(create_app()) as client:
-        response = client.get("/api/dev/mock/transcript")
+        response = client.post("/api/settings/test-asr")
 
     assert response.status_code == 200
     data = response.json()
-    assert len(data) >= 1
-    first_segment = data[0]
-    assert first_segment["speaker"].startswith("Speaker")
-    assert first_segment["startMs"] < first_segment["endMs"]
-    assert first_segment["text"]
-    assert 0 <= first_segment["confidence"] <= 1
+    assert isinstance(data["ok"], bool)
+    assert data["provider"] == "dashscope"
 
 
-def test_mock_note_endpoint_returns_markdown() -> None:
+def test_llm_settings_endpoint_runs_provider_probe() -> None:
     with TestClient(create_app()) as client:
-        response = client.get("/api/dev/mock/note")
+        response = client.post("/api/settings/test-llm")
 
     assert response.status_code == 200
     data = response.json()
-    assert data["markdown"].startswith("# Meeting Minutes")
+    assert data["ok"] is True
+    assert data["provider"] == "dashscope-compatible"

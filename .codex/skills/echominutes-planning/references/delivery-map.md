@@ -8,21 +8,21 @@ Minimum runnable monorepo skeleton:
 - FastAPI backend
 - `GET /api/health`
 - renderer backend health display
-- settings placeholder
+- local settings surface
 - SQLite initialization skeleton
-- MockASRProvider and MockLLMProvider
+- ASR and LLM provider abstractions
 - Windows and Linux development scripts
 - Python backend managed with `uv`
 
 ## P1
 
-File import and mock transcription:
+File import and DashScope transcription:
 
 - Electron file dialog
 - Meeting record creation
 - copy media into workspace
 - transcription task API
-- mock speaker-separated segments
+- provider speaker-separated segments
 - persisted transcript segments
 - transcript workspace display
 - task status transitions
@@ -34,7 +34,7 @@ Note generation and editing:
 - note data model
 - summarize API
 - standard meeting-note prompt template
-- MockLLMProvider fixed Markdown
+- DashScope-compatible Markdown generation through the LLM provider
 - note editor
 - save edited Markdown
 - regenerate note action

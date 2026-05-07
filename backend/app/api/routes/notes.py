@@ -7,9 +7,9 @@ from app.db.session import get_db
 from app.schemas.note import NoteResponse, NoteUpdate
 from app.services.workflow.note_service import (
     NoteWorkflowError,
+    generate_meeting_note,
     get_note,
     save_note,
-    summarize_meeting_with_mock,
 )
 
 router = APIRouter(prefix="/meetings/{meeting_id}/note")
@@ -34,7 +34,7 @@ async def read_note(meeting_id: str, db: DbSession) -> NoteResponse | None:
 @router.post("/summarize", response_model=NoteResponse)
 async def summarize_meeting(meeting_id: str, db: DbSession) -> NoteResponse:
     try:
-        return summarize_meeting_with_mock(db, meeting_id)
+        return generate_meeting_note(db, meeting_id)
     except NoteWorkflowError as error:
         raise _note_error_to_http(error) from error
 

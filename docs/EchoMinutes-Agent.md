@@ -1274,10 +1274,12 @@ Markdown / structured note -> python-docx -> docx
 echominutes-agent/
   AGENTS.md
   README.md
-  package.json
-  pnpm-workspace.yaml
-  apps/
+  pyproject.toml
+  uv.lock
+  frontend/
     package.json
+    pnpm-lock.yaml
+    pnpm-workspace.yaml
     electron.vite.config.ts
     tsconfig.json
     electron/
@@ -1292,7 +1294,6 @@ echominutes-agent/
         services/
         styles/
   backend/
-    pyproject.toml
     app/
       main.py
       api/

@@ -7,11 +7,13 @@ from app.models.meeting import Meeting
 from app.models.note import NoteRecord
 from app.prompts.meeting_note import build_meeting_note_prompt
 from app.schemas.note import NoteUpdate
-from app.services.providers.llm.mock import MockLLMProvider
+from app.services.providers.errors import ProviderRequestError
+from app.services.providers.llm.factory import get_llm_provider
 from app.services.workflow.transcription_service import get_transcript_segments
 from app.utils.logging import get_app_logger
 
 logger = get_app_logger("note")
+
 
 class NoteWorkflowError(ValueError):
     pass
@@ -22,7 +24,7 @@ def get_note(db: Session, meeting_id: str) -> NoteRecord | None:
     return db.scalars(statement).first()
 
 
-def summarize_meeting_with_mock(db: Session, meeting_id: str) -> NoteRecord:
+def generate_meeting_note(db: Session, meeting_id: str) -> NoteRecord:
     meeting = db.get(Meeting, meeting_id)
     if meeting is None:
         raise NoteWorkflowError("Meeting not found.")
@@ -32,8 +34,17 @@ def summarize_meeting_with_mock(db: Session, meeting_id: str) -> NoteRecord:
         raise NoteWorkflowError("Transcript is required before generating a note.")
 
     prompt = build_meeting_note_prompt(segments)
-    provider = MockLLMProvider()
-    markdown = provider.generate_meeting_note(prompt=prompt, segments=segments)
+    try:
+        provider = get_llm_provider()
+        markdown = provider.generate_meeting_note(prompt=prompt, segments=segments)
+    except ProviderRequestError as error:
+        message = f"DashScope note generation failed: {error.code} - {error.message}"
+        logger.error("Meeting note generation failed meeting_id=%s error=%s", meeting_id, error)
+        raise NoteWorkflowError(message) from error
+    except Exception as error:
+        message = "DashScope note generation failed. Check your LLM settings and retry."
+        logger.exception("Meeting note generation failed meeting_id=%s", meeting_id)
+        raise NoteWorkflowError(message) from error
 
     note = get_note(db, meeting_id)
     if note is None:

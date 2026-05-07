@@ -25,6 +25,12 @@ class Settings(BaseSettings):
         alias="DASHSCOPE_BASE_URL",
     )
     dashscope_model: str = Field(default="qwen-plus", alias="DASHSCOPE_MODEL")
+    dashscope_asr_base_url_raw: str = Field(default="", alias="DASHSCOPE_ASR_BASE_URL")
+    dashscope_asr_model: str = Field(
+        default="paraformer-realtime-v2",
+        alias="DASHSCOPE_ASR_MODEL",
+    )
+    ffmpeg_path_raw: str = Field(default="", alias="ECHOMINUTES_FFMPEG_PATH")
 
     @cached_property
     def workspace_dir(self) -> Path:
@@ -49,6 +55,28 @@ class Settings(BaseSettings):
     def has_dashscope_api_key(self) -> bool:
         key = self.dashscope_api_key.strip()
         return bool(key and key != "sk-<your_api_key>")
+
+    @property
+    def transcription_provider(self) -> str:
+        return "dashscope"
+
+    @property
+    def dashscope_asr_base_url(self) -> str:
+        raw_base_url = self.dashscope_asr_base_url_raw.strip()
+        if raw_base_url:
+            return raw_base_url.rstrip("/")
+
+        compatible_mode_suffix = "/compatible-mode/v1"
+        llm_base_url = self.dashscope_base_url.strip().rstrip("/")
+        if llm_base_url.endswith(compatible_mode_suffix):
+            return f"{llm_base_url[:-len(compatible_mode_suffix)]}/api/v1"
+
+        return "https://dashscope.aliyuncs.com/api/v1"
+
+    @property
+    def ffmpeg_path(self) -> str | None:
+        value = self.ffmpeg_path_raw.strip()
+        return value or None
 
 
 settings = Settings()

@@ -50,7 +50,7 @@ def create_export(db: Session, meeting_id: str, export_format: str) -> ExportRec
     elif export_format == "pdf":
         write_pdf_export(meeting.title, note.markdown, target_path)
     else:
-        write_word_export(note.markdown, target_path)
+        write_word_export(meeting.title, note.markdown, target_path)
 
     export = ExportRecord(
         id=export_id,

@@ -1,8 +1,7 @@
 from pathlib import Path
 
-from fastapi.testclient import TestClient
-
 from app.main import create_app
+from fastapi.testclient import TestClient
 
 
 def test_transcribe_meeting_persists_segments_and_updates_status(tmp_path: Path) -> None:
