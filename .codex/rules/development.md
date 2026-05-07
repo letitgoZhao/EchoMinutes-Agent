@@ -3,7 +3,7 @@
 ## Before Editing
 
 - Read `AGENTS.md`.
-- Read `docs/EchoMinutes-Agent.md`.
+- Read `docs/EchoMinutes-Agent.md` when it exists locally; the product manual is local-only and intentionally ignored by git.
 - Inspect the current code and project structure.
 - Identify the active delivery slice.
 - Keep the task small enough to verify.

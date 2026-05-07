@@ -19,6 +19,8 @@ interface SelectedMediaFile {
 function findProjectRoot(): string {
   const candidates = [
     process.env.ECHOMINUTES_PROJECT_DIR,
+    process.resourcesPath,
+    join(process.resourcesPath, "app"),
     resolve(app.getAppPath(), ".."),
     resolve(app.getAppPath(), "../.."),
     resolve(process.cwd(), ".."),

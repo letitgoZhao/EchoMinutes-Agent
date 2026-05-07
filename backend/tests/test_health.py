@@ -39,6 +39,7 @@ def test_settings_endpoint_updates_safe_local_values() -> None:
             json={
                 "workspace_dir": "./workspace.local",
                 "dashscope_model": "qwen-plus",
+                "dashscope_asr_model": "paraformer-realtime-v2",
             },
         )
 
@@ -60,7 +61,9 @@ def test_asr_settings_endpoint_reports_dashscope_readiness() -> None:
 
 def test_llm_settings_endpoint_runs_provider_probe() -> None:
     with TestClient(create_app()) as client:
+        client.put("/api/settings", json={"dashscope_api_key": "sk-test"})
         response = client.post("/api/settings/test-llm")
+        client.put("/api/settings", json={"clear_dashscope_api_key": True})
 
     assert response.status_code == 200
     data = response.json()

@@ -7,7 +7,9 @@ from app.models.meeting import Meeting
 from app.models.task import ProcessingTask
 from app.models.transcript_segment import TranscriptSegmentRecord
 from app.schemas.transcript import TranscriptSegment
-from app.services.providers.asr.factory import get_asr_provider
+from app.services.providers.asr.factory import get_asr_provider_with_settings
+from app.services.providers.errors import ProviderRequestError
+from app.services.settings_service import get_provider_runtime_settings
 from app.services.workflow.media_preprocess_service import (
     MediaPreparationError,
     prepare_media_for_transcription,
@@ -126,7 +128,13 @@ def _run_transcription_for_task(db: Session, task: ProcessingTask) -> Meeting:
         if not meeting.workspace_media_path:
             raise TranscriptionError("Meeting media is not available for transcription.")
 
-        provider = get_asr_provider()
+        provider_settings = get_provider_runtime_settings(db)
+        provider = get_asr_provider_with_settings(
+            api_key=provider_settings.dashscope_api_key,
+            model=provider_settings.dashscope_asr_model,
+            base_url=provider_settings.dashscope_asr_base_url,
+            speaker_count=provider_settings.dashscope_asr_speaker_count,
+        )
         prepared_media = prepare_media_for_transcription(
             task.meeting_id,
             meeting.workspace_media_path,
@@ -185,6 +193,19 @@ def _run_transcription_for_task(db: Session, task: ProcessingTask) -> Meeting:
             error,
         )
         raise TranscriptionError(str(error)) from error
+    except ProviderRequestError as error:
+        message = f"DashScope transcription failed: {error.code} - {error.message}"
+        meeting.status = "failed"
+        meeting.error_message = message
+        _fail_task(db, task, message, retryable=True)
+        db.refresh(meeting)
+        logger.error(
+            "Transcription provider failed meeting_id=%s task_id=%s error=%s",
+            task.meeting_id,
+            task.id,
+            error,
+        )
+        raise TranscriptionError(message) from error
     except TranscriptionError as error:
         meeting.status = "failed"
         meeting.error_message = str(error)

@@ -30,6 +30,7 @@ class Settings(BaseSettings):
         default="paraformer-realtime-v2",
         alias="DASHSCOPE_ASR_MODEL",
     )
+    dashscope_asr_speaker_count: int = Field(default=0, alias="DASHSCOPE_ASR_SPEAKER_COUNT")
     ffmpeg_path_raw: str = Field(default="", alias="ECHOMINUTES_FFMPEG_PATH")
 
     @cached_property

@@ -57,16 +57,16 @@ class TestLLMProvider:
 @pytest.fixture(autouse=True)
 def use_test_providers(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
-        "app.services.workflow.transcription_service.get_asr_provider",
-        lambda: TestASRProvider(),
+        "app.services.workflow.transcription_service.get_asr_provider_with_settings",
+        lambda **_: TestASRProvider(),
     )
     monkeypatch.setattr(
-        "app.services.workflow.note_service.get_llm_provider",
-        lambda: TestLLMProvider(),
+        "app.services.workflow.note_service.get_llm_provider_with_settings",
+        lambda **_: TestLLMProvider(),
     )
     monkeypatch.setattr(
-        "app.api.routes.settings.get_llm_provider",
-        lambda: TestLLMProvider(),
+        "app.api.routes.settings.get_llm_provider_with_settings",
+        lambda **_: TestLLMProvider(),
     )
     monkeypatch.setattr(
         "app.services.workflow.transcription_service.prepare_media_for_transcription",

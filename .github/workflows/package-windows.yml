@@ -1,0 +1,46 @@
+name: Package Windows
+
+on:
+  workflow_dispatch:
+
+jobs:
+  package:
+    name: Build Windows installer
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install backend dependencies
+        run: uv sync
+
+      - name: Install frontend dependencies
+        run: corepack pnpm --dir frontend install --frozen-lockfile
+
+      - name: Build Windows installer
+        env:
+          ECHOMINUTES_WORKSPACE_DIR: ${{ runner.temp }}\echominutes-workspace
+        run: corepack pnpm --dir frontend package:win
+
+      - name: Upload installer artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: echominutes-agent-windows
+          path: release/**

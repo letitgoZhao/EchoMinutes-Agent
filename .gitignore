@@ -23,6 +23,9 @@ __pycache__/
 venv/
 env/
 .pytest_cache/
+pytest-cache-files-*/
+.pytest-temp/
+backend/.pytest-temp/
 .ruff_cache/
 .mypy_cache/
 .coverage
@@ -58,12 +61,18 @@ workspace.local/
 media/
 exports/
 data/
+docs/EchoMinutes-Agent.md
 *.sqlite
 *.sqlite3
 *.db
 *.db-journal
 wav/
 .cache/
+.corepack-home/
+.uv-cache-local/
+.runtime-workspace/
+backend/.uv-cache-local/
+backend/.runtime-workspace/
 
 # OS and editor noise
 .DS_Store

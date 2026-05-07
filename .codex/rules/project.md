@@ -14,7 +14,7 @@ import media -> transcribe -> structure dialogue -> generate note -> edit -> exp
 
 Do not start with login, SaaS backend, payment, cloud sync, collaboration, real-time recording, enterprise admin, or packaging polish.
 
-The full product manual is `docs/EchoMinutes-Agent.md`.
+The full product manual is `docs/EchoMinutes-Agent.md` when it exists locally. It is intentionally ignored by git.
 
 ## Priority Order
 

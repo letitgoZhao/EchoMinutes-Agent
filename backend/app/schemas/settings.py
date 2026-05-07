@@ -11,6 +11,7 @@ class AppSettings(BaseModel):
     dashscope_model: str = Field(serialization_alias="dashscopeModel")
     dashscope_asr_base_url: str = Field(serialization_alias="dashscopeAsrBaseUrl")
     dashscope_asr_model: str = Field(serialization_alias="dashscopeAsrModel")
+    dashscope_asr_speaker_count: int = Field(serialization_alias="dashscopeAsrSpeakerCount")
     has_dashscope_api_key: bool = Field(serialization_alias="hasDashscopeApiKey")
     ffmpeg_available: bool = Field(serialization_alias="ffmpegAvailable")
     ffmpeg_path: str | None = Field(serialization_alias="ffmpegPath")
@@ -18,5 +19,10 @@ class AppSettings(BaseModel):
 
 class AppSettingsUpdate(BaseModel):
     workspace_dir: str | None = None
+    dashscope_api_key: str | None = None
     dashscope_base_url: str | None = None
     dashscope_model: str | None = None
+    dashscope_asr_base_url: str | None = None
+    dashscope_asr_model: str | None = None
+    dashscope_asr_speaker_count: int | None = None
+    clear_dashscope_api_key: bool = False

@@ -5,7 +5,9 @@ import {
   getSettings,
   testAsrSettings,
   testLlmSettings,
+  updateSettings,
   type AppSettings,
+  type AppSettingsUpdate,
   type LogEntry,
   type ProviderTestResponse
 } from "../services/apiClient";
@@ -19,7 +21,9 @@ interface SettingsState {
   asrTest: ProviderTestResponse | null;
   testingLlm: boolean;
   testingAsr: boolean;
+  saving: boolean;
   error: string | null;
+  savedMessage: string | null;
 }
 
 export const useSettingsStore = defineStore("settings", {
@@ -32,12 +36,15 @@ export const useSettingsStore = defineStore("settings", {
     asrTest: null,
     testingLlm: false,
     testingAsr: false,
-    error: null
+    saving: false,
+    error: null,
+    savedMessage: null
   }),
   actions: {
     async loadSettings() {
       this.loading = true;
       this.error = null;
+      this.savedMessage = null;
       try {
         this.settings = await getSettings();
       } catch (error) {
@@ -59,6 +66,21 @@ export const useSettingsStore = defineStore("settings", {
     },
     async loadDiagnostics() {
       await Promise.all([this.loadSettings(), this.loadRecentLogs()]);
+    },
+    async saveSettings(payload: AppSettingsUpdate) {
+      this.saving = true;
+      this.error = null;
+      this.savedMessage = null;
+      try {
+        this.settings = await updateSettings(payload);
+        this.savedMessage = "Settings saved locally.";
+        this.llmTest = null;
+        this.asrTest = null;
+      } catch (error) {
+        this.error = error instanceof Error ? error.message : "Failed to save settings";
+      } finally {
+        this.saving = false;
+      }
     },
     async testLlmProvider() {
       this.testingLlm = true;

@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: ["main", "master"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  checks:
+    name: Backend and desktop checks
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install backend dependencies
+        run: uv sync
+
+      - name: Run backend tests
+        env:
+          ECHOMINUTES_WORKSPACE_DIR: ${{ runner.temp }}\echominutes-workspace
+        run: uv run --project backend pytest
+
+      - name: Install frontend dependencies
+        run: corepack pnpm --dir frontend install --frozen-lockfile
+
+      - name: Typecheck desktop
+        run: corepack pnpm --dir frontend typecheck
+
+      - name: Build desktop
+        run: corepack pnpm --dir frontend build

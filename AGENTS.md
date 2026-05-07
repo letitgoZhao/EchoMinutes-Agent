@@ -22,7 +22,7 @@ local audio/video import
 At the start of each task:
 
 1. Read this file.
-2. Read `docs/EchoMinutes-Agent.md`.
+2. Read `docs/EchoMinutes-Agent.md` when it exists locally. This product manual is local-only and intentionally ignored by git.
 3. Check `.codex/rules/project.md` and any relevant rule file in `.codex/rules/`.
 4. Inspect the current repository structure and code before making assumptions.
 5. Identify the active delivery slice: P0, P1, P2, or P3.

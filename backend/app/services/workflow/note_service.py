@@ -8,7 +8,8 @@ from app.models.note import NoteRecord
 from app.prompts.meeting_note import build_meeting_note_prompt
 from app.schemas.note import NoteUpdate
 from app.services.providers.errors import ProviderRequestError
-from app.services.providers.llm.factory import get_llm_provider
+from app.services.providers.llm.factory import get_llm_provider_with_settings
+from app.services.settings_service import get_provider_runtime_settings
 from app.services.workflow.transcription_service import get_transcript_segments
 from app.utils.logging import get_app_logger
 
@@ -35,7 +36,12 @@ def generate_meeting_note(db: Session, meeting_id: str) -> NoteRecord:
 
     prompt = build_meeting_note_prompt(segments)
     try:
-        provider = get_llm_provider()
+        provider_settings = get_provider_runtime_settings(db)
+        provider = get_llm_provider_with_settings(
+            api_key=provider_settings.dashscope_api_key,
+            model=provider_settings.dashscope_model,
+            base_url=provider_settings.dashscope_base_url,
+        )
         markdown = provider.generate_meeting_note(prompt=prompt, segments=segments)
     except ProviderRequestError as error:
         message = f"DashScope note generation failed: {error.code} - {error.message}"

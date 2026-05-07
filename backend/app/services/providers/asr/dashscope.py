@@ -7,6 +7,7 @@ import dashscope
 from dashscope.audio.asr import Recognition, RecognitionCallback
 
 from app.schemas.transcript import TranscriptSegment
+from app.services.providers.errors import ProviderRequestError
 
 
 class DashScopeASRProvider:
@@ -16,10 +17,12 @@ class DashScopeASRProvider:
         api_key: str,
         model: str,
         base_url: str,
+        speaker_count: int = 0,
     ) -> None:
         self.api_key = api_key
         self.model = model
         self.base_url = base_url.rstrip("/")
+        self.speaker_count = max(speaker_count, 0)
 
     def transcribe(
         self,
@@ -36,16 +39,23 @@ class DashScopeASRProvider:
             callback=RecognitionCallback(),
             format=media_format,
             sample_rate=sample_rate_hz,
+            diarization_enabled=True,
+            speaker_count=self.speaker_count or None,
             semantic_punctuation_enabled=True,
+            timestamp_alignment_enabled=True,
         )
         result = recognition.call(
             str(Path(media_path).resolve()),
-            diarization_enabled=True,
-            timestamp_alignment_enabled=True,
         )
         if result.status_code != HTTPStatus.OK:
+            code = result.code or "RequestFailed"
             message = result.message or result.code or "DashScope ASR request failed."
-            raise ValueError(message)
+            raise ProviderRequestError(
+                provider="DashScope ASR",
+                status_code=int(result.status_code) if result.status_code else None,
+                code=str(code),
+                message=str(message),
+            )
         sentences = result.get_sentence()
         return _map_sentences_to_segments(sentences)
 

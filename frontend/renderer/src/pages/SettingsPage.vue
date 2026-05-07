@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from "vue";
+import { onMounted, reactive, watch } from "vue";
 
 import { useI18nStore } from "../stores/i18n";
 import { useSettingsStore } from "../stores/settings";
@@ -7,9 +7,56 @@ import { useSettingsStore } from "../stores/settings";
 const settingsStore = useSettingsStore();
 const i18n = useI18nStore();
 
+const form = reactive({
+  workspaceDir: "",
+  dashscopeApiKey: "",
+  dashscopeBaseUrl: "",
+  dashscopeModel: "",
+  dashscopeAsrBaseUrl: "",
+  dashscopeAsrModel: "",
+  dashscopeAsrSpeakerCount: 0
+});
+
+watch(
+  () => settingsStore.settings,
+  (settings) => {
+    if (!settings) {
+      return;
+    }
+
+    form.workspaceDir = settings.workspaceDir;
+    form.dashscopeBaseUrl = settings.dashscopeBaseUrl;
+    form.dashscopeModel = settings.dashscopeModel;
+    form.dashscopeAsrBaseUrl = settings.dashscopeAsrBaseUrl;
+    form.dashscopeAsrModel = settings.dashscopeAsrModel;
+    form.dashscopeAsrSpeakerCount = settings.dashscopeAsrSpeakerCount;
+  },
+  { immediate: true }
+);
+
 onMounted(() => {
   void settingsStore.loadDiagnostics();
 });
+
+async function saveProviderSettings() {
+  await settingsStore.saveSettings({
+    workspaceDir: form.workspaceDir,
+    dashscopeApiKey: form.dashscopeApiKey.trim() || undefined,
+    dashscopeBaseUrl: form.dashscopeBaseUrl,
+    dashscopeModel: form.dashscopeModel,
+    dashscopeAsrBaseUrl: form.dashscopeAsrBaseUrl,
+    dashscopeAsrModel: form.dashscopeAsrModel,
+    dashscopeAsrSpeakerCount: form.dashscopeAsrSpeakerCount
+  });
+  form.dashscopeApiKey = "";
+}
+
+async function clearApiKey() {
+  await settingsStore.saveSettings({
+    clearDashscopeApiKey: true
+  });
+  form.dashscopeApiKey = "";
+}
 </script>
 
 <template>
@@ -26,6 +73,66 @@ onMounted(() => {
     </p>
 
     <p v-if="settingsStore.error" class="error-copy">{{ settingsStore.error }}</p>
+    <p v-if="settingsStore.savedMessage" class="success-copy">
+      {{ i18n.t("settingsSaved") }}
+    </p>
+
+    <form v-if="settingsStore.settings" class="provider-config" @submit.prevent="saveProviderSettings">
+      <header>
+        <section>
+          <h3>{{ i18n.t("providerConfigTitle") }}</h3>
+          <p class="muted-copy">{{ i18n.t("providerConfigDescription") }}</p>
+        </section>
+      </header>
+
+      <label>
+        <span>{{ i18n.t("workspace") }}</span>
+        <input v-model="form.workspaceDir" autocomplete="off" />
+      </label>
+      <label>
+        <span>{{ i18n.t("dashscopeApiKey") }}</span>
+        <input
+          v-model="form.dashscopeApiKey"
+          autocomplete="off"
+          :placeholder="i18n.t('apiKeyPlaceholder')"
+          type="password"
+        />
+      </label>
+      <label>
+        <span>{{ i18n.t("dashscopeBaseUrl") }}</span>
+        <input v-model="form.dashscopeBaseUrl" autocomplete="off" />
+      </label>
+      <label>
+        <span>{{ i18n.t("dashscopeModel") }}</span>
+        <input v-model="form.dashscopeModel" autocomplete="off" />
+      </label>
+      <label>
+        <span>{{ i18n.t("dashscopeAsrBaseUrl") }}</span>
+        <input v-model="form.dashscopeAsrBaseUrl" autocomplete="off" />
+      </label>
+      <label>
+        <span>{{ i18n.t("dashscopeAsrModel") }}</span>
+        <input v-model="form.dashscopeAsrModel" autocomplete="off" />
+      </label>
+      <label>
+        <span>{{ i18n.t("dashscopeAsrSpeakerCount") }}</span>
+        <input v-model.number="form.dashscopeAsrSpeakerCount" min="0" step="1" type="number" />
+      </label>
+
+      <footer class="settings-actions">
+        <button type="submit" :disabled="settingsStore.saving">
+          {{ settingsStore.saving ? i18n.t("savingSettings") : i18n.t("saveSettings") }}
+        </button>
+        <button
+          type="button"
+          :disabled="settingsStore.saving || !settingsStore.settings.hasDashscopeApiKey"
+          @click="clearApiKey"
+        >
+          {{ i18n.t("clearApiKey") }}
+        </button>
+      </footer>
+    </form>
+
     <dl v-if="settingsStore.settings" class="settings-grid">
       <dt>{{ i18n.t("apiHost") }}</dt>
       <dd>{{ settingsStore.settings.apiHost }}</dd>
@@ -45,6 +152,8 @@ onMounted(() => {
       <dd>{{ settingsStore.settings.dashscopeAsrBaseUrl }}</dd>
       <dt>{{ i18n.t("dashscopeAsrModel") }}</dt>
       <dd>{{ settingsStore.settings.dashscopeAsrModel }}</dd>
+      <dt>{{ i18n.t("dashscopeAsrSpeakerCount") }}</dt>
+      <dd>{{ settingsStore.settings.dashscopeAsrSpeakerCount || i18n.t("auto") }}</dd>
       <dt>{{ i18n.t("apiKeyConfigured") }}</dt>
       <dd>
         {{ settingsStore.settings.hasDashscopeApiKey ? i18n.t("yes") : i18n.t("no") }}

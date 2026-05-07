@@ -14,9 +14,21 @@ export interface AppSettings {
   dashscopeModel: string;
   dashscopeAsrBaseUrl: string;
   dashscopeAsrModel: string;
+  dashscopeAsrSpeakerCount: number;
   hasDashscopeApiKey: boolean;
   ffmpegAvailable: boolean;
   ffmpegPath: string | null;
+}
+
+export interface AppSettingsUpdate {
+  workspaceDir?: string;
+  dashscopeApiKey?: string;
+  dashscopeBaseUrl?: string;
+  dashscopeModel?: string;
+  dashscopeAsrBaseUrl?: string;
+  dashscopeAsrModel?: string;
+  dashscopeAsrSpeakerCount?: number;
+  clearDashscopeApiKey?: boolean;
 }
 
 export interface LogEntry {
@@ -146,6 +158,22 @@ export function getHealth(): Promise<HealthResponse> {
 
 export function getSettings(): Promise<AppSettings> {
   return requestJson<AppSettings>("/api/settings");
+}
+
+export function updateSettings(payload: AppSettingsUpdate): Promise<AppSettings> {
+  return requestJson<AppSettings>("/api/settings", {
+    method: "PUT",
+    body: JSON.stringify({
+      workspace_dir: payload.workspaceDir,
+      dashscope_api_key: payload.dashscopeApiKey,
+      dashscope_base_url: payload.dashscopeBaseUrl,
+      dashscope_model: payload.dashscopeModel,
+      dashscope_asr_base_url: payload.dashscopeAsrBaseUrl,
+      dashscope_asr_model: payload.dashscopeAsrModel,
+      dashscope_asr_speaker_count: payload.dashscopeAsrSpeakerCount,
+      clear_dashscope_api_key: payload.clearDashscopeApiKey ?? false
+    })
+  });
 }
 
 export function getRecentLogs(limit = 50): Promise<LogEntry[]> {

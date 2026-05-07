@@ -848,6 +848,54 @@ button:disabled {
   overflow: hidden;
 }
 
+.provider-config {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  display: grid;
+  gap: 12px;
+  margin: 16px 0;
+  padding: 14px;
+}
+
+.provider-config header {
+  margin-bottom: 2px;
+}
+
+.provider-config h3,
+.provider-config p {
+  margin: 0;
+}
+
+.provider-config label {
+  display: grid;
+  gap: 6px;
+}
+
+.provider-config label span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.provider-config input {
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  color: var(--text);
+  min-width: 0;
+  padding: 9px 10px;
+  width: 100%;
+}
+
+.settings-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-start;
+}
+
 .settings-grid dt,
 .settings-grid dd {
   border-bottom: 1px solid var(--border);
