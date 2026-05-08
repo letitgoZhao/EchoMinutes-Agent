@@ -1,5 +1,5 @@
 import { app, BrowserWindow, dialog, ipcMain, shell } from "electron";
-import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
+import { spawn, spawnSync, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { existsSync } from "node:fs";
 import { request } from "node:http";
 import { isAbsolute, join, resolve } from "node:path";
@@ -73,6 +73,11 @@ function startBackend(): void {
     console.error(`[backend] ${chunk.toString().trim()}`);
   });
 
+  backendProcess.on("error", (error) => {
+    console.error(`[backend] Failed to start backend process: ${error.message}`);
+    backendProcess = null;
+  });
+
   backendProcess.on("exit", () => {
     backendProcess = null;
   });
@@ -112,7 +117,14 @@ function stopBackend(): void {
     return;
   }
 
-  backendProcess.kill();
+  const backendPid = backendProcess.pid;
+  if (process.platform === "win32" && backendPid) {
+    spawnSync("taskkill", ["/pid", String(backendPid), "/T", "/F"], {
+      windowsHide: true
+    });
+  } else {
+    backendProcess.kill();
+  }
   backendProcess = null;
 }
 
@@ -220,8 +232,9 @@ app.whenReady().then(async () => {
 
   const shouldSkipBackendStart = process.env.ECHOMINUTES_SKIP_BACKEND_START === "1";
   const backendAlreadyRunning = await isBackendRunning();
+  const shouldStartBackend = !shouldSkipBackendStart && !backendAlreadyRunning;
 
-  if (!shouldSkipBackendStart && !backendAlreadyRunning) {
+  if (shouldStartBackend) {
     startBackend();
   }
 

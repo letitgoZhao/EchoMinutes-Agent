@@ -40,10 +40,10 @@ jobs:
         run: uv run --project backend pytest
 
       - name: Install frontend dependencies
-        run: corepack pnpm --dir frontend install --frozen-lockfile
+        run: corepack pnpm@9.15.0 --dir frontend install --frozen-lockfile
 
       - name: Typecheck desktop
-        run: corepack pnpm --dir frontend typecheck
+        run: corepack pnpm@9.15.0 --dir frontend typecheck
 
       - name: Build desktop
-        run: corepack pnpm --dir frontend build
+        run: corepack pnpm@9.15.0 --dir frontend build

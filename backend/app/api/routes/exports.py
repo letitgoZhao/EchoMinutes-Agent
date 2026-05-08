@@ -7,10 +7,8 @@ from app.db.session import get_db
 from app.schemas.export import ExportCreate, ExportResponse
 from app.services.workflow.export_service import (
     ExportWorkflowError,
+    create_export,
     list_exports,
-)
-from app.services.workflow.export_service import (
-    create_export as create_export_record,
 )
 
 router = APIRouter(prefix="/meetings/{meeting_id}/exports")
@@ -33,12 +31,12 @@ async def read_exports(meeting_id: str, db: DbSession) -> list[ExportResponse]:
 
 
 @router.post("", response_model=ExportResponse, status_code=status.HTTP_201_CREATED)
-async def create_export(
+async def create_export_endpoint(
     meeting_id: str,
     payload: ExportCreate,
     db: DbSession,
 ) -> ExportResponse:
     try:
-        return create_export_record(db, meeting_id, payload.format)
+        return create_export(db, meeting_id, payload.format)
     except ExportWorkflowError as error:
         raise _export_error_to_http(error) from error

@@ -7,7 +7,7 @@ Local-first meeting minutes, from long audio/video to editable notes. ✨
 ![Electron](https://img.shields.io/badge/Electron-47848F?logo=electron&logoColor=white)
 ![Vue.js](https://img.shields.io/badge/Vue.js-35495E?logo=vuedotjs&logoColor=4FC08D)
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
-![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.12+-3776AB?logo=python&logoColor=white)
 ![SQLite](https://img.shields.io/badge/SQLite-local--first-003B57?logo=sqlite&logoColor=white)
 ![Qwen](https://img.shields.io/badge/Qwen-DashScope-5C6B73)
 ![License](https://img.shields.io/badge/License-MIT-green)
@@ -59,7 +59,7 @@ The Windows installer currently bundles the Electron app plus backend source/loc
 
 ```powershell
 uv sync
-corepack pnpm --dir frontend install
+corepack pnpm@9.15.0 --dir frontend install
 .\scripts\dev.ps1
 ```
 

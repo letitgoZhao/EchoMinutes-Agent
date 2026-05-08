@@ -6,13 +6,16 @@
   "author": "letitgoZhao",
   "license": "MIT",
   "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=20.20.0"
+  },
   "main": "out/main/index.js",
   "type": "module",
   "scripts": {
     "dev": "electron-vite dev",
     "build": "vue-tsc --noEmit && electron-vite build",
     "preview": "electron-vite preview",
-    "package:win": "corepack pnpm build && electron-builder --win nsis --x64",
+    "package:win": "corepack pnpm@9.15.0 build && electron-builder --win nsis --x64",
     "typecheck": "vue-tsc --noEmit",
     "lint": "vue-tsc --noEmit"
   },
@@ -65,15 +68,15 @@
     }
   },
   "dependencies": {
-    "@vitejs/plugin-vue": "^5.2.1",
-    "electron-vite": "^2.3.0",
     "pinia": "^2.3.0",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0"
   },
   "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.1",
     "electron": "^33.2.1",
     "electron-builder": "^25.1.8",
+    "electron-vite": "^2.3.0",
     "typescript": "^5.7.2",
     "vite": "^5.4.11",
     "vue-tsc": "^2.1.10"

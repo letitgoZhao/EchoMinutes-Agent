@@ -10,7 +10,7 @@
 ## JavaScript
 
 - Use `pnpm` for the Electron/Vue workspace unless the project later chooses otherwise.
-- Keep frontend package files under `frontend/` and run frontend commands with `corepack pnpm --dir frontend ...` from the repository root.
+- Keep frontend package files under `frontend/` and run frontend commands with `corepack pnpm@9.15.0 --dir frontend ...` from the repository root so Corepack does not resolve a newer pnpm from the repository root.
 - Keep package scripts focused on common workflows: dev, build, typecheck, lint, test.
 
 ## Environment

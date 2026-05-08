@@ -16,28 +16,37 @@ from app.services.workflow.transcription_service import (
     rename_speaker,
     retry_transcription_task,
     run_transcription_task,
+    transcribe_meeting,
     update_transcript_segment,
-)
-from app.services.workflow.transcription_service import (
-    transcribe_meeting as run_meeting_transcription,
 )
 
 router = APIRouter(prefix="/meetings/{meeting_id}")
 DbSession = Annotated[Session, Depends(get_db)]
 
 
+def _workflow_error_to_http(
+    error: ValueError,
+    *,
+    not_found_details: set[str] | None = None,
+) -> HTTPException:
+    detail = str(error)
+    status_code = (
+        status.HTTP_404_NOT_FOUND
+        if detail in (not_found_details or set())
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return HTTPException(status_code=status_code, detail=detail)
+
+
 @router.post("/transcribe", response_model=MeetingResponse)
-async def transcribe_meeting(meeting_id: str, db: DbSession) -> MeetingResponse:
+async def transcribe_meeting_endpoint(meeting_id: str, db: DbSession) -> MeetingResponse:
     try:
-        return run_meeting_transcription(db, meeting_id)
+        return transcribe_meeting(db, meeting_id)
     except TranscriptionError as error:
-        detail = str(error)
-        status_code = (
-            status.HTTP_404_NOT_FOUND
-            if detail == "Meeting not found."
-            else status.HTTP_400_BAD_REQUEST
-        )
-        raise HTTPException(status_code=status_code, detail=detail) from error
+        raise _workflow_error_to_http(
+            error,
+            not_found_details={"Meeting not found."},
+        ) from error
 
 
 @router.get("/transcription-tasks", response_model=list[ProcessingTaskResponse])
@@ -58,13 +67,10 @@ async def start_transcription_task(
         meeting = run_transcription_task(db, task)
         return TranscriptionTaskRunResponse(task=task, meeting=meeting)
     except TranscriptionError as error:
-        detail = str(error)
-        status_code = (
-            status.HTTP_404_NOT_FOUND
-            if detail == "Meeting not found."
-            else status.HTTP_400_BAD_REQUEST
-        )
-        raise HTTPException(status_code=status_code, detail=detail) from error
+        raise _workflow_error_to_http(
+            error,
+            not_found_details={"Meeting not found."},
+        ) from error
 
 
 @router.post(
@@ -81,18 +87,12 @@ async def retry_transcription(
         meeting = run_transcription_task(db, task)
         return TranscriptionTaskRunResponse(task=task, meeting=meeting)
     except TaskRetryError as error:
-        detail = str(error)
-        status_code = (
-            status.HTTP_404_NOT_FOUND
-            if detail == "Transcription task not found."
-            else status.HTTP_400_BAD_REQUEST
-        )
-        raise HTTPException(status_code=status_code, detail=detail) from error
-    except TranscriptionError as error:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(error),
+        raise _workflow_error_to_http(
+            error,
+            not_found_details={"Transcription task not found."},
         ) from error
+    except TranscriptionError as error:
+        raise _workflow_error_to_http(error) from error
 
 
 @router.get("/transcript", response_model=list[TranscriptSegment])
@@ -109,13 +109,10 @@ async def update_speaker(
     try:
         return rename_speaker(db, meeting_id, payload.current_speaker, payload.new_speaker)
     except TranscriptionError as error:
-        detail = str(error)
-        status_code = (
-            status.HTTP_404_NOT_FOUND
-            if detail in {"Meeting not found.", "Speaker not found in transcript."}
-            else status.HTTP_400_BAD_REQUEST
-        )
-        raise HTTPException(status_code=status_code, detail=detail) from error
+        raise _workflow_error_to_http(
+            error,
+            not_found_details={"Meeting not found.", "Speaker not found in transcript."},
+        ) from error
 
 
 @router.patch("/segments/{segment_id}", response_model=TranscriptSegment)
@@ -128,10 +125,7 @@ async def update_segment(
     try:
         return update_transcript_segment(db, meeting_id, segment_id, payload.text)
     except TranscriptionError as error:
-        detail = str(error)
-        status_code = (
-            status.HTTP_404_NOT_FOUND
-            if detail in {"Meeting not found.", "Transcript segment not found."}
-            else status.HTTP_400_BAD_REQUEST
-        )
-        raise HTTPException(status_code=status_code, detail=detail) from error
+        raise _workflow_error_to_http(
+            error,
+            not_found_details={"Meeting not found.", "Transcript segment not found."},
+        ) from error

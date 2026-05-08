@@ -32,12 +32,12 @@ jobs:
         run: uv sync
 
       - name: Install frontend dependencies
-        run: corepack pnpm --dir frontend install --frozen-lockfile
+        run: corepack pnpm@9.15.0 --dir frontend install --frozen-lockfile
 
       - name: Build Windows installer
         env:
           ECHOMINUTES_WORKSPACE_DIR: ${{ runner.temp }}\echominutes-workspace
-        run: corepack pnpm --dir frontend package:win
+        run: corepack pnpm@9.15.0 --dir frontend package:win
 
       - name: Upload installer artifacts
         uses: actions/upload-artifact@v4
