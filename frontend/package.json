@@ -15,7 +15,8 @@
     "dev": "electron-vite dev",
     "build": "vue-tsc --noEmit && electron-vite build",
     "preview": "electron-vite preview",
-    "package:win": "corepack pnpm@9.15.0 build && electron-builder --win nsis --x64",
+    "package:backend": "uv run --project .. --managed-python --python 3.12 --with pyinstaller pyinstaller --noconfirm --clean --onefile --name echominutes-backend --paths ../backend --distpath ../dist --workpath ../build/pyinstaller --specpath ../build ../scripts/backend_launcher.py",
+    "package:win": "corepack pnpm@9.15.0 package:backend && corepack pnpm@9.15.0 build && electron-builder --win nsis --x64",
     "typecheck": "vue-tsc --noEmit",
     "lint": "vue-tsc --noEmit"
   },
@@ -36,6 +37,10 @@
         "filter": [
           "app/**"
         ]
+      },
+      {
+        "from": "../dist/echominutes-backend.exe",
+        "to": "backend-runtime/echominutes-backend.exe"
       },
       {
         "from": "../pyproject.toml",
