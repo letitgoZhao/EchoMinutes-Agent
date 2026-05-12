@@ -1,3 +1,4 @@
+from datetime import UTC, datetime
 from pathlib import Path
 from shutil import copy2
 from uuid import uuid4
@@ -17,12 +18,31 @@ class MeetingImportError(ValueError):
 
 
 def list_meetings(db: Session) -> list[Meeting]:
-    statement = select(Meeting).order_by(Meeting.created_at.desc())
+    statement = (
+        select(Meeting)
+        .where(Meeting.deleted_at.is_(None))
+        .order_by(Meeting.created_at.desc())
+    )
     return list(db.scalars(statement).all())
 
 
 def get_meeting(db: Session, meeting_id: str) -> Meeting | None:
-    return db.get(Meeting, meeting_id)
+    meeting = db.get(Meeting, meeting_id)
+    if meeting is None or meeting.deleted_at is not None:
+        return None
+    return meeting
+
+
+def soft_delete_meeting(db: Session, meeting_id: str) -> Meeting | None:
+    meeting = get_meeting(db, meeting_id)
+    if meeting is None:
+        return None
+
+    meeting.deleted_at = datetime.now(UTC)
+    db.commit()
+    db.refresh(meeting)
+    logger.info("Soft deleted meeting meeting_id=%s", meeting.id)
+    return meeting
 
 
 def create_meeting_from_source(db: Session, payload: MeetingCreate) -> Meeting:

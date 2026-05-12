@@ -10,6 +10,7 @@ from app.services.workflow.meeting_service import (
     create_meeting_from_source,
     get_meeting,
     list_meetings,
+    soft_delete_meeting,
 )
 
 router = APIRouter(prefix="/meetings")
@@ -38,3 +39,10 @@ async def read_meeting(meeting_id: str, db: DbSession) -> MeetingResponse:
     if meeting is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Meeting not found.")
     return meeting
+
+
+@router.delete("/{meeting_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_meeting(meeting_id: str, db: DbSession) -> None:
+    meeting = soft_delete_meeting(db, meeting_id)
+    if meeting is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Meeting not found.")

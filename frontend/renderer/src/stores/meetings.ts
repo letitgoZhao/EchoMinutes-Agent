@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 
 import {
   createMeeting,
+  deleteMeeting,
   exportMeeting,
   getMeetingExports,
   getMeetingNote,
@@ -40,6 +41,7 @@ interface MeetingsState {
   retryingTranscription: boolean;
   renamingSpeaker: boolean;
   updatingTranscriptSegmentId: string | null;
+  deletingMeetingId: string | null;
   error: string | null;
 }
 
@@ -62,6 +64,7 @@ export const useMeetingsStore = defineStore("meetings", {
     retryingTranscription: false,
     renamingSpeaker: false,
     updatingTranscriptSegmentId: null,
+    deletingMeetingId: null,
     error: null
   }),
   getters: {
@@ -106,6 +109,14 @@ export const useMeetingsStore = defineStore("meetings", {
       await this.loadExports(meetingId);
       await this.loadTranscriptionTasks(meetingId);
     },
+    clearSelectedMeeting() {
+      this.selectedMeetingId = null;
+      this.transcript = [];
+      this.noteMarkdown = "";
+      this.savedNoteMarkdown = "";
+      this.exports = [];
+      this.transcriptionTasks = [];
+    },
     async importMedia() {
       this.importing = true;
       this.error = null;
@@ -141,6 +152,28 @@ export const useMeetingsStore = defineStore("meetings", {
         this.transcript = await getMeetingTranscript(meetingId);
       } catch (error) {
         this.error = error instanceof Error ? error.message : "Failed to load transcript";
+      }
+    },
+    async deleteMeeting(meetingId: string) {
+      this.deletingMeetingId = meetingId;
+      this.error = null;
+      try {
+        await deleteMeeting(meetingId);
+        const wasSelected = this.selectedMeetingId === meetingId;
+        this.meetings = this.meetings.filter((meeting) => meeting.id !== meetingId);
+
+        if (wasSelected) {
+          const nextMeeting = this.meetings[0] ?? null;
+          if (nextMeeting) {
+            await this.selectMeeting(nextMeeting.id);
+          } else {
+            this.clearSelectedMeeting();
+          }
+        }
+      } catch (error) {
+        this.error = error instanceof Error ? error.message : "Failed to delete meeting";
+      } finally {
+        this.deletingMeetingId = null;
       }
     },
     async runTranscription() {

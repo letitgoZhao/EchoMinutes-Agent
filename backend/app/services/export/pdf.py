@@ -1,188 +1,194 @@
-from dataclasses import dataclass
 from pathlib import Path
-from textwrap import wrap
+
+from reportlab.lib import colors
+from reportlab.lib.enums import TA_LEFT
+from reportlab.lib.pagesizes import LETTER
+from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+from reportlab.lib.units import inch
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.platypus import Flowable, Paragraph, SimpleDocTemplate, Spacer
 
 from app.services.export.markdown_blocks import MarkdownBlock, parse_markdown_blocks
+from app.utils.logging import get_app_logger
 
-PAGE_WIDTH = 612
-PAGE_HEIGHT = 792
-MARGIN_X = 48
-MARGIN_TOP = 54
-MARGIN_BOTTOM = 54
+logger = get_app_logger("export.pdf")
 
-
-@dataclass(frozen=True)
-class PdfLine:
-    text: str
-    size: int = 11
-    leading: int = 15
-    indent: int = 0
-    gap_before: int = 0
+FONT_NAME = "EchoMinutesUnicode"
+FALLBACK_FONT = "Helvetica"
 
 
 def write_pdf_export(title: str, markdown: str, target_path: Path) -> None:
-    lines = _markdown_to_pdf_lines(title, markdown)
-    pages = _paginate(lines)
-    objects: list[bytes] = []
+    font_name = _register_unicode_font()
+    styles = _build_styles(font_name)
+    story = _build_story(title, markdown, styles)
 
-    font_object_id = 3 + len(pages) * 2
-    cid_font_object_id = font_object_id + 1
-    descriptor_object_id = font_object_id + 2
-    info_object_id = font_object_id + 3
-    page_ids = [3 + index * 2 for index in range(len(pages))]
-    content_ids = [4 + index * 2 for index in range(len(pages))]
-
-    objects.append(b"<< /Type /Catalog /Pages 2 0 R >>")
-    kids = " ".join(f"{page_id} 0 R" for page_id in page_ids)
-    objects.append(f"<< /Type /Pages /Kids [{kids}] /Count {len(page_ids)} >>".encode("ascii"))
-
-    for content_id, page_lines in zip(content_ids, pages, strict=True):
-        page = (
-            f"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 {PAGE_WIDTH} {PAGE_HEIGHT}] "
-            f"/Resources << /Font << /F1 {font_object_id} 0 R >> >> "
-            f"/Contents {content_id} 0 R >>"
-        )
-        objects.append(page.encode("ascii"))
-        stream = _build_text_stream(page_lines)
-        objects.append(
-            b"<< /Length "
-            + str(len(stream)).encode("ascii")
-            + b" >>\nstream\n"
-            + stream
-            + b"endstream"
-        )
-
-    objects.append(
-        (
-            f"<< /Type /Font /Subtype /Type0 /BaseFont /STSong-Light "
-            f"/Encoding /UniGB-UCS2-H /DescendantFonts [{cid_font_object_id} 0 R] >>"
-        ).encode("ascii")
-    )
-    objects.append(
-        (
-            f"<< /Type /Font /Subtype /CIDFontType0 /BaseFont /STSong-Light "
-            f"/CIDSystemInfo << /Registry (Adobe) /Ordering (GB1) /Supplement 5 >> "
-            f"/FontDescriptor {descriptor_object_id} 0 R >>"
-        ).encode("ascii")
-    )
-    objects.append(
-        b"<< /Type /FontDescriptor /FontName /STSong-Light /Flags 6 "
-        b"/FontBBox [0 -200 1000 900] /ItalicAngle 0 /Ascent 880 "
-        b"/Descent -120 /CapHeight 700 /StemV 80 >>"
-    )
-    objects.append(
-        (
-            f"<< /Title ({_escape_pdf_literal(title)}) "
-            f"/Producer (EchoMinutes Agent) >>"
-        ).encode("ascii")
-    )
-    pdf_bytes = _assemble_pdf(objects, info_object_id=info_object_id)
     target_path.parent.mkdir(parents=True, exist_ok=True)
-    target_path.write_bytes(pdf_bytes)
+    document = SimpleDocTemplate(
+        str(target_path),
+        pagesize=LETTER,
+        rightMargin=0.72 * inch,
+        leftMargin=0.72 * inch,
+        topMargin=0.68 * inch,
+        bottomMargin=0.68 * inch,
+        title=title,
+        author="EchoMinutes Agent",
+        creator="EchoMinutes Agent",
+        producer="EchoMinutes Agent",
+    )
+    document.build(story)
 
 
-def _markdown_to_pdf_lines(title: str, markdown: str) -> list[PdfLine]:
-    lines = [PdfLine(title, size=18, leading=24), PdfLine("", leading=8)]
+def _build_story(title: str, markdown: str, styles: dict[str, ParagraphStyle]) -> list[Flowable]:
+    story: list[Flowable] = [
+        Paragraph(_escape_paragraph(title), styles["title"]),
+        Spacer(1, 0.18 * inch),
+    ]
+
     for block in parse_markdown_blocks(markdown):
-        lines.extend(_block_to_pdf_lines(block))
-    return lines
+        story.extend(_block_to_flowables(block, styles))
+
+    return story
 
 
-def _block_to_pdf_lines(block: MarkdownBlock) -> list[PdfLine]:
+def _block_to_flowables(
+    block: MarkdownBlock,
+    styles: dict[str, ParagraphStyle],
+) -> list[Flowable]:
     if block.kind == "blank":
-        return [PdfLine("", leading=8)]
+        return [Spacer(1, 0.08 * inch)]
+
     if block.kind == "heading":
-        size = {1: 17, 2: 14, 3: 12}.get(block.level, 12)
-        return [
-            PdfLine(text, size=size, leading=size + 7, gap_before=8)
-            for text in _wrap_text(block.text, width=max(28, 72 - block.level * 4))
-        ]
+        level = min(max(block.level, 1), 3)
+        return [Paragraph(_escape_paragraph(block.text), styles[f"heading{level}"])]
+
     if block.kind == "bullet":
-        wrapped = _wrap_text(block.text, width=72)
-        return [
-            PdfLine(f"- {wrapped[0]}", indent=10),
-            *[PdfLine(line, indent=22) for line in wrapped[1:]],
-        ]
+        return [Paragraph(_escape_paragraph(block.text), styles["bullet"], bulletText="-")]
+
     if block.kind == "numbered":
-        wrapped = _wrap_text(block.text, width=70)
         return [
-            PdfLine(f"{block.number} {wrapped[0]}", indent=10),
-            *[PdfLine(line, indent=26) for line in wrapped[1:]],
+            Paragraph(
+                _escape_paragraph(block.text),
+                styles["numbered"],
+                bulletText=f"{block.number}",
+            )
         ]
-    return [PdfLine(line) for line in _wrap_text(block.text, width=78)]
+
+    return [Paragraph(_escape_paragraph(block.text), styles["body"])]
 
 
-def _wrap_text(text: str, width: int) -> list[str]:
-    return wrap(
-        text,
-        width=width,
-        break_long_words=True,
-        replace_whitespace=False,
-    ) or [""]
+def _build_styles(font_name: str) -> dict[str, ParagraphStyle]:
+    base_styles = getSampleStyleSheet()
+    text_color = colors.HexColor("#172126")
+    muted_color = colors.HexColor("#44545b")
+
+    body = ParagraphStyle(
+        "EchoMinutesBody",
+        parent=base_styles["BodyText"],
+        alignment=TA_LEFT,
+        fontName=font_name,
+        fontSize=10.5,
+        leading=15,
+        textColor=text_color,
+        spaceAfter=7,
+        wordWrap="CJK",
+    )
+    title = ParagraphStyle(
+        "EchoMinutesTitle",
+        parent=body,
+        fontSize=18,
+        leading=24,
+        spaceAfter=10,
+    )
+
+    return {
+        "title": title,
+        "heading1": ParagraphStyle(
+            "EchoMinutesHeading1",
+            parent=body,
+            fontSize=16,
+            leading=21,
+            spaceBefore=8,
+            spaceAfter=7,
+        ),
+        "heading2": ParagraphStyle(
+            "EchoMinutesHeading2",
+            parent=body,
+            fontSize=14,
+            leading=19,
+            spaceBefore=7,
+            spaceAfter=6,
+        ),
+        "heading3": ParagraphStyle(
+            "EchoMinutesHeading3",
+            parent=body,
+            fontSize=12,
+            leading=17,
+            spaceBefore=6,
+            spaceAfter=5,
+            textColor=muted_color,
+        ),
+        "body": body,
+        "bullet": ParagraphStyle(
+            "EchoMinutesBullet",
+            parent=body,
+            leftIndent=18,
+            firstLineIndent=0,
+            bulletIndent=6,
+        ),
+        "numbered": ParagraphStyle(
+            "EchoMinutesNumbered",
+            parent=body,
+            leftIndent=22,
+            firstLineIndent=0,
+            bulletIndent=4,
+        ),
+    }
 
 
-def _paginate(lines: list[PdfLine]) -> list[list[PdfLine]]:
-    pages: list[list[PdfLine]] = [[]]
-    remaining = PAGE_HEIGHT - MARGIN_TOP - MARGIN_BOTTOM
-    for line in lines:
-        needed = line.leading + line.gap_before
-        if pages[-1] and needed > remaining:
-            pages.append([])
-            remaining = PAGE_HEIGHT - MARGIN_TOP - MARGIN_BOTTOM
-        pages[-1].append(line)
-        remaining -= needed
-    return pages
+def _register_unicode_font() -> str:
+    registered_fonts = set(pdfmetrics.getRegisteredFontNames())
+    if FONT_NAME in registered_fonts:
+        return FONT_NAME
+
+    for font_path in _unicode_font_candidates():
+        if not font_path.exists():
+            continue
+        try:
+            pdfmetrics.registerFont(TTFont(FONT_NAME, str(font_path)))
+        except Exception as error:  # pragma: no cover - depends on host font files.
+            logger.warning("Unable to register PDF font path=%s error=%s", font_path, error)
+            continue
+
+        logger.info("Registered PDF export font path=%s", font_path)
+        return FONT_NAME
+
+    logger.warning(
+        "No usable Unicode desktop font found for PDF export; falling back to %s.",
+        FALLBACK_FONT,
+    )
+    return FALLBACK_FONT
 
 
-def _build_text_stream(lines: list[PdfLine]) -> bytes:
-    commands: list[str] = []
-    y = PAGE_HEIGHT - MARGIN_TOP
-    for line in lines:
-        y -= line.gap_before
-        commands.append("BT")
-        commands.append(f"/F1 {line.size} Tf")
-        commands.append(f"1 0 0 1 {MARGIN_X + line.indent} {y} Tm")
-        commands.append(f"<{_encode_pdf_text(line.text)}> Tj")
-        commands.append("ET")
-        y -= line.leading
-    return ("\n".join(commands) + "\n").encode("ascii")
+def _unicode_font_candidates() -> list[Path]:
+    return [
+        Path("C:/Windows/Fonts/msyh.ttf"),
+        Path("C:/Windows/Fonts/msyh.ttc"),
+        Path("C:/Windows/Fonts/simsun.ttc"),
+        Path("C:/Windows/Fonts/simhei.ttf"),
+        Path("/System/Library/Fonts/PingFang.ttc"),
+        Path("/System/Library/Fonts/STHeiti Light.ttc"),
+        Path("/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"),
+        Path("/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc"),
+        Path("/usr/share/fonts/truetype/wqy/wqy-microhei.ttc"),
+        Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"),
+    ]
 
 
-def _encode_pdf_text(value: str) -> str:
-    return value.encode("utf-16-be", errors="replace").hex().upper()
-
-
-def _escape_pdf_literal(value: str) -> str:
+def _escape_paragraph(value: str) -> str:
     return (
-        value.encode("ascii", errors="ignore")
-        .decode("ascii")
-        .replace("\\", "\\\\")
-        .replace("(", "\\(")
-        .replace(")", "\\)")
+        value.replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace("\n", "<br/>")
     )
-
-
-def _assemble_pdf(objects: list[bytes], *, info_object_id: int) -> bytes:
-    output = bytearray(b"%PDF-1.4\n")
-    offsets = [0]
-    for object_id, body in enumerate(objects, start=1):
-        offsets.append(len(output))
-        output.extend(f"{object_id} 0 obj\n".encode("ascii"))
-        output.extend(body)
-        output.extend(b"\nendobj\n")
-
-    xref_offset = len(output)
-    output.extend(f"xref\n0 {len(objects) + 1}\n".encode("ascii"))
-    output.extend(b"0000000000 65535 f \n")
-    for offset in offsets[1:]:
-        output.extend(f"{offset:010d} 00000 n \n".encode("ascii"))
-    output.extend(
-        (
-            "trailer\n"
-            f"<< /Size {len(objects) + 1} /Root 1 0 R /Info {info_object_id} 0 R >>\n"
-            "startxref\n"
-            f"{xref_offset}\n"
-            "%%EOF\n"
-        ).encode("ascii")
-    )
-    return bytes(output)

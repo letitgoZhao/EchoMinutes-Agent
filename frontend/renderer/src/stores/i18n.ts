@@ -17,6 +17,10 @@ export const translations = {
     p1ImportDescription: "Import local media and keep every step traceable.",
     importMedia: "Import Media",
     importingMedia: "Importing...",
+    deleteMeeting: "Delete",
+    deletingMeeting: "Deleting...",
+    deleteMeetingConfirm:
+      "Remove \"{title}\" from the meeting library? Local media and exports will stay on disk.",
     runTranscription: "Run DashScope ASR",
     transcribingMedia: "Transcribing...",
     loadingMeetings: "Loading meetings...",
@@ -106,8 +110,16 @@ export const translations = {
     noRecentLogs: "No recent logs yet.",
     llmReadiness: "LLM Readiness",
     asrReadiness: "ASR Readiness",
+    providerReadiness: "Provider Readiness",
+    providerReadinessDescription:
+      "Run quick local checks before sending media to ASR or transcript text to the LLM.",
     testProvider: "Test",
+    testAllProviders: "Test Providers",
     testingProvider: "Testing...",
+    providerTestPending: "Not tested in this session.",
+    hostRuntimeTitle: "Host Runtime",
+    hostRuntimeDescription:
+      "Local API, workspace, provider, and media tooling state for this machine.",
     providerConfigTitle: "Runtime Provider Settings",
     providerConfigDescription:
       "Saved locally in SQLite for packaged app runs. The API key is never shown after saving.",

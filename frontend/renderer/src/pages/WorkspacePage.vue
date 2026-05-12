@@ -30,7 +30,9 @@ onMounted(() => {
       :selected-meeting-id="meetingsStore.selectedMeetingId"
       :loading="meetingsStore.loading"
       :importing="meetingsStore.importing"
+      :deleting-meeting-id="meetingsStore.deletingMeetingId"
       :error="meetingsStore.error"
+      @delete-meeting="meetingsStore.deleteMeeting"
       @import-media="meetingsStore.importMedia"
       @select-meeting="meetingsStore.selectMeeting"
     />

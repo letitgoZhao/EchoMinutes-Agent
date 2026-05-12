@@ -72,6 +72,40 @@ def test_pdf_export_writes_pdf_file(tmp_path: Path) -> None:
     assert b"EchoMinutes Agent" in pdf_bytes
 
 
+def test_pdf_export_handles_unicode_content(tmp_path: Path) -> None:
+    source_file = tmp_path / "unicode-review.mp3"
+    source_file.write_bytes(b"fake audio data")
+
+    with TestClient(create_app()) as client:
+        create_response = client.post(
+            "/api/meetings",
+            json={"source_file_path": str(source_file), "title": "中文会议 € Review"},
+        )
+        meeting = create_response.json()
+        client.put(
+            f"/api/meetings/{meeting['id']}/note",
+            json={
+                "markdown": (
+                    "# 中文会议纪要\n\n"
+                    "本次讨论包含中文、English and € currency symbols.\n\n"
+                    "## 决策\n\n"
+                    "- 修复 PDF 乱码。\n"
+                    "1. Verify Unicode export."
+                )
+            },
+        )
+        export_response = client.post(
+            f"/api/meetings/{meeting['id']}/exports",
+            json={"format": "pdf"},
+        )
+
+    assert export_response.status_code == 201
+    export = export_response.json()
+    pdf_bytes = Path(export["filePath"]).read_bytes()
+    assert pdf_bytes.startswith(b"%PDF-")
+    assert len(pdf_bytes) > 1024
+
+
 def test_word_export_writes_docx_file(tmp_path: Path) -> None:
     with TestClient(create_app()) as client:
         meeting = _create_meeting_with_note(client, tmp_path)

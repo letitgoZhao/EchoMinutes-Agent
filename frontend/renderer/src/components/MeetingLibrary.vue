@@ -7,12 +7,14 @@ defineProps<{
   selectedMeetingId: string | null;
   loading: boolean;
   importing: boolean;
+  deletingMeetingId: string | null;
   error: string | null;
 }>();
 
 const emit = defineEmits<{
   importMedia: [];
   selectMeeting: [meetingId: string];
+  deleteMeeting: [meetingId: string];
 }>();
 
 const i18n = useI18nStore();
@@ -28,6 +30,13 @@ function getStatusLabel(status: string): string {
     return i18n.t("statusTranscribing");
   }
   return i18n.t("statusImported");
+}
+
+function confirmDeleteMeeting(meeting: Meeting): void {
+  const confirmed = window.confirm(i18n.t("deleteMeetingConfirm", { title: meeting.title }));
+  if (confirmed) {
+    emit("deleteMeeting", meeting.id);
+  }
 }
 </script>
 
@@ -53,16 +62,35 @@ function getStatusLabel(status: string): string {
         </li>
         <template v-else>
           <li v-for="meeting in meetings" :key="meeting.id">
-            <button
-              type="button"
-              class="meeting-list-item"
-              :class="{ active: meeting.id === selectedMeetingId }"
-              @click="emit('selectMeeting', meeting.id)"
-            >
-              <strong class="meeting-list-item-title">{{ meeting.title }}</strong>
-              <span class="meeting-list-item-meta">{{ meeting.sourceFileName }}</span>
-              <small>{{ getStatusLabel(meeting.status) }}</small>
-            </button>
+            <div class="meeting-list-row" :class="{ active: meeting.id === selectedMeetingId }">
+              <button
+                type="button"
+                class="meeting-list-item"
+                @click="emit('selectMeeting', meeting.id)"
+              >
+                <strong class="meeting-list-item-title">{{ meeting.title }}</strong>
+                <span class="meeting-list-item-meta">{{ meeting.sourceFileName }}</span>
+                <small>{{ getStatusLabel(meeting.status) }}</small>
+              </button>
+              <details class="meeting-row-actions" @click.stop>
+                <summary :title="i18n.t('deleteMeeting')" aria-label="Meeting actions">
+                  <span aria-hidden="true">...</span>
+                </summary>
+                <button
+                  type="button"
+                  class="meeting-delete-button"
+                  :disabled="deletingMeetingId === meeting.id"
+                  :title="i18n.t('deleteMeeting')"
+                  @click="confirmDeleteMeeting(meeting)"
+                >
+                  {{
+                    deletingMeetingId === meeting.id
+                      ? i18n.t("deletingMeeting")
+                      : i18n.t("deleteMeeting")
+                  }}
+                </button>
+              </details>
+            </div>
           </li>
         </template>
       </ol>

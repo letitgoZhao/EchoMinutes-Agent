@@ -149,6 +149,10 @@ async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
     throw new Error(`Request failed: ${response.status} ${response.statusText}${suffix}`);
   }
 
+  if (response.status === 204) {
+    return undefined as T;
+  }
+
   return response.json() as Promise<T>;
 }
 
@@ -205,6 +209,12 @@ export function createMeeting(payload: MeetingCreate): Promise<Meeting> {
       language: payload.language ?? "auto",
       accent_hint: payload.accentHint ?? null
     })
+  });
+}
+
+export async function deleteMeeting(meetingId: string): Promise<void> {
+  await requestJson<void>(`/api/meetings/${meetingId}`, {
+    method: "DELETE"
   });
 }
 
