@@ -1,10 +1,11 @@
-<h1 align="center">EchoMinutes-Agent</h1>
+<div align="center">
+
+# EchoMinutes-Agent
 
 <p>
 EchoMinutes Agent is a local-first desktop AI meeting-minutes workspace. It turns long local audio or video files into transcripts, Qwen-style meeting notes, editable Markdown, and Markdown/PDF/Word exports.
 </p>
 
-<div align="center">
 ![Electron](https://img.shields.io/badge/Electron-47848F?logo=electron&logoColor=white)
 ![Vue.js](https://img.shields.io/badge/Vue%203-35495E?logo=vuedotjs&logoColor=4FC08D)
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
@@ -12,6 +13,7 @@ EchoMinutes Agent is a local-first desktop AI meeting-minutes workspace. It turn
 ![SQLite](https://img.shields.io/badge/SQLite-local--first-003B57?logo=sqlite&logoColor=white)
 ![DashScope](https://img.shields.io/badge/DashScope-ASR%20%2B%20Qwen-5C6B73)
 ![License](https://img.shields.io/badge/License-MIT-green)
+
 </div>
 
 ## What It Does
