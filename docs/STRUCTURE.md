@@ -93,7 +93,7 @@ EchoMinutes-Agent/
 
 These paths are intentionally ignored and can be cleaned when they are only cache/output data:
 
-|||text
+```text
 .env
 .venv/
 .pytest_cache/
@@ -108,6 +108,6 @@ workspace.local/
 *.sqlite3
 logs/
 wav/
-|||
+```
 
 Real API keys, imported media, generated exports, and local databases must stay out of git.

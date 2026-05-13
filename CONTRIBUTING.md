@@ -5,8 +5,7 @@ Thanks for helping build EchoMinutes-Agent.
 Before changing code, read:
 
 1. `AGENTS.md`
-2. `docs/EchoMinutes-Agent.md`
-3. `.codex/rules/project.md`
+2. `.codex/rules/project.md`
 
 ## Development Principles
 

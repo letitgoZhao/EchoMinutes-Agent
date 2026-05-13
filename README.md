@@ -1,7 +1,10 @@
-# EchoMinutes-Agent
+<h1 align="center">EchoMinutes-Agent</h1>
 
+<p>
 EchoMinutes Agent is a local-first desktop AI meeting-minutes workspace. It turns long local audio or video files into transcripts, Qwen-style meeting notes, editable Markdown, and Markdown/PDF/Word exports.
+</p>
 
+<div align="center">
 ![Electron](https://img.shields.io/badge/Electron-47848F?logo=electron&logoColor=white)
 ![Vue.js](https://img.shields.io/badge/Vue%203-35495E?logo=vuedotjs&logoColor=4FC08D)
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
@@ -9,6 +12,7 @@ EchoMinutes Agent is a local-first desktop AI meeting-minutes workspace. It turn
 ![SQLite](https://img.shields.io/badge/SQLite-local--first-003B57?logo=sqlite&logoColor=white)
 ![DashScope](https://img.shields.io/badge/DashScope-ASR%20%2B%20Qwen-5C6B73)
 ![License](https://img.shields.io/badge/License-MIT-green)
+</div>
 
 ## What It Does
 
@@ -33,6 +37,12 @@ The first public preview is **v0.1.0** for Windows.
 - Open Settings, enter a DashScope API key, test provider readiness, then import a local audio or video file.
 
 The Windows package includes the Electron desktop app and a bundled FastAPI backend runtime, so normal users do not need to install Python or `uv` just to launch the packaged app.
+
+### Windows Security Notice
+
+Early GitHub Release builds may show a Microsoft Defender SmartScreen or Microsoft Edge warning because the preview installer is new and may be unsigned or low-reputation. Download only from this repository's GitHub Releases page, compare the installer against the published `.sha256` file, then choose **Keep** / **More info** / **Run anyway** only if you trust the source.
+
+Future releases should be code-signed with a stable publisher certificate to reduce these warnings.
 
 ## Highlights
 
